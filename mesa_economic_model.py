@@ -7,6 +7,13 @@ from mesa.time import Priority, Schedule
 # Import Cell Agent and OrthogonalMooreGrid
 from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 
+# Add function for model level collection
+def compute_gini(model):
+    agent_wealths = [agent.wealth for agent in model.agents]
+    x = sorted(agent_wealths)
+    n = model.num_agents
+    B = sum(xi * (n - i) for i, xi in enumerate(x)) / (n * sum(x))
+    return 1 + (1 / n) - 2 * B
 
 # Instantiate MoneyAgent as CellAgent
 class MoneyAgent(CellAgent):
@@ -38,31 +45,30 @@ class MoneyModel(mesa.Model):
     def __init__(self, n, width, height, rng=None):
         super().__init__(rng=rng)
         self.num_agents = n
-        # Instantiate an instance of Moore neighborhood space
         self.grid = OrthogonalMooreGrid((width, height), torus=True, random=self.random)
+        self.datacollector = mesa.DataCollector(
+            model_reporters={"Gini": compute_gini}, agent_reporters={"Wealth": "wealth"}
+        )
 
         # Create agents
         agents = MoneyAgent.create_agents(
             self,
             self.num_agents,
-            # Randomly select agents cell
             self.random.choices(self.grid.all_cells.cells, k=self.num_agents),
         )
 
     def step(self):
+        # Collect data each step
+        self.datacollector.collect(self)
         self.agents.shuffle_do("move")
         self.agents.do("give_money")
 
 model = MoneyModel(100, 10, 10)
-for _ in range(20):
-    model.step()
+model.run_for(100)
+# Let's make sure it worked
+print(len(model.agents))
 
-agent_counts = np.zeros((model.grid.width, model.grid.height))
-
-for cell in model.grid.all_cells:
-    agent_counts[cell.coordinate] = len(cell.agents)
-# Plot using seaborn, with a visual size of 5x5
-g = sns.heatmap(agent_counts, cmap="viridis", annot=True, cbar=False, square=True)
-g.figure.set_size_inches(5, 5)
-g.set(title="Number of agents on each cell of the grid");
-plt.show()
+# Extract MoneyModel data in a Pandas dataframe
+gini = model.datacollector.get_model_vars_dataframe()
+g = sns.lineplot(data=gini)
+g.set(title="Gini Coefficient over Time", ylabel="Gini Coefficient");
