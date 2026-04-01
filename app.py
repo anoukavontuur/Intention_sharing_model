@@ -1,38 +1,44 @@
 from mesa.visualization import SolaraViz, SpaceRenderer
-from mesa.visualization.components import AgentPortrayalStyle
+from mesa.visualization.components import AgentPortrayalStyle, PropertyLayerStyle
 
-from agents import MarkerAgent, VesselAgent
+from agents import VesselAgent
 from model import IntentionSharingModel
 
 import parameters as p
 
-IntentionSharingModel = IntentionSharingModel(number_of_vessels=p.number_of_vessels, width=p.width, height=p.height, start_coordinate=p.start_coordinate, goal_coordinate=p.goal_coordinate)
+# Create the model instance
+model_instance = IntentionSharingModel(
+    number_of_vessels=p.number_of_vessels,
+    width=p.width,
+    height=p.height
+)
 
 def agent_portrayal(agent):
     if isinstance(agent, VesselAgent):
-        portrayal = AgentPortrayalStyle(color="tab:orange", marker="^", size=50)
-    elif isinstance(agent, MarkerAgent):
-        portrayal = AgentPortrayalStyle(color="tab:red", marker="x", size=30)
-    return portrayal
+        return AgentPortrayalStyle(color="tab:orange", marker="o", size=200)
+    return None
+
+def property_layer_portrayal(layer):
+    if layer.name == "paths":
+        return PropertyLayerStyle(color="tab:blue", alpha=0.3, colorbar=False)
+    return None
 
 model_params = {
     "number_of_vessels": p.number_of_vessels,
     "width": p.width,
     "height": p.height,
-    "start_coordinate": p.start_coordinate,
-    "goal_coordinate": p.goal_coordinate
 }
 
 renderer = (
-    SpaceRenderer(model=IntentionSharingModel, backend="matplotlib")
+    SpaceRenderer(model=model_instance, backend="matplotlib")
     .setup_agents(agent_portrayal)
+    .setup_propertylayer(property_layer_portrayal)
     .render()
 )
 
 page = SolaraViz(
-    IntentionSharingModel,
+    model_instance,
     renderer,
     model_params=model_params,
-    name = "Intention Sharing Model"
+    name="Intention Sharing Model",
 )
-

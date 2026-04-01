@@ -1,8 +1,7 @@
 # Parameters
-number_of_vessels = 1
-start_coordinate = (0, 0)
-goal_coordinate = (7, 5)
+number_of_vessels = 3
+
 
 # Grid dimensions
-width = 10  
-height = 10
+width = 20  
+height = 20

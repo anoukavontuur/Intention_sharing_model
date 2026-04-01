@@ -64,13 +64,13 @@ def A_star_search(graph, start, goal):
                 frontier.put(next, priority)
                 came_from[next] = current
                 
-    return came_from, cost_so_far
+    return came_from
 
 def reconstruct_path(came_from, start, goal):
     current = goal
     path = []
     if goal not in came_from: # no path was found
-        return None
+        return []
     while current != start:
         path.append(current)
         current = came_from[current]
