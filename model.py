@@ -1,5 +1,6 @@
 from agents import VesselAgent
 from pathfinding import GridGraph
+import parameters as p
 
 import mesa
 from mesa.discrete_space import OrthogonalMooreGrid
@@ -12,11 +13,13 @@ class IntentionSharingModel(mesa.Model):
         self.GridGraph = GridGraph(width, height)
 
         VesselAgent.create_agents(
-            self, 
-            self.number_of_vessels, 
-            start_cell=self.random.choices(self.grid.all_cells.cells, k=number_of_vessels),
-            goal_cell=self.random.choices(self.grid.all_cells.cells, k=number_of_vessels))      
-      
+            self,
+            self.number_of_vessels,
+            start_cell=[self.grid[pos] for pos in p.start_positions],
+            goal_cell=[self.grid[pos] for pos in p.goal_positions],
+            start_velocity=[v for v in p.start_velocities],
+        )
+        
         self.agents_by_type[VesselAgent].do("set_path")
         self.grid.create_property_layer("paths", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
@@ -28,7 +31,6 @@ class IntentionSharingModel(mesa.Model):
                 self.grid[coordinate].paths += 1.0
    
     def step(self):
-        self.agents_by_type[VesselAgent].do("say_hi")
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()
 
