@@ -11,3 +11,4 @@ detection_radius = 5
 # Grid dimensions
 width = 5  
 height = 5
+

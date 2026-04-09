@@ -10,7 +10,7 @@ import parameters as p
 model_instance = IntentionSharingModel(
     number_of_vessels=p.number_of_vessels,
     width=p.width,
-    height=p.height
+    height=p.height,
 )
 
 def agent_portrayal(agent):
