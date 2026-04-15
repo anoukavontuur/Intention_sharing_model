@@ -14,10 +14,12 @@ class VesselAgent(CellAgent):
         self.movement_buffer = 0
 
         self.plan = {}
+        self.reservation_table = []
 
     def change_goal(self, new_goal_cell):
         self.goal = new_goal_cell
         self.plan = {}
+        self.reservation_table = []
 
     def set_path(self, graph, reservation_table=None):
         came_from, goal_state = spacetime_A_star_search(
@@ -27,7 +29,7 @@ class VesselAgent(CellAgent):
             reservation_table=reservation_table,
         )
 
-        self.plan = reconstruct_path(came_from, self.state, goal_state)
+        self.plan, self.reservation_table = reconstruct_path(came_from, self.state, goal_state)
         print(f"Agent {self.unique_id} planned path: {self.plan}")
         
     def move_along_path(self):
@@ -41,8 +43,11 @@ class VesselAgent(CellAgent):
         self.plan.pop(current_time-1)
         self.cell = target_cell
 
-    def detect_nearby_vessels(self, radius):
+    def detect_collision(self, radius):
         """Detect nearby vessels and check for planned conflicts using space-time paths."""
+        self.collision_agents = []
+
+        # Check for nearby agents
         self.nearby_agents = [
             nearby_agent
             for cell in self.cell.get_neighborhood(radius=radius)
@@ -53,9 +58,9 @@ class VesselAgent(CellAgent):
         # Collision detection based on planned paths (space-time)
         for nearby_agent in self.nearby_agents:
             print(f"Agent {self.unique_id} detects nearby agent {nearby_agent.unique_id} at cell {nearby_agent.cell.coordinate}.")
-            for step in self.planning: 
-                if self.planning[step] == nearby_agent.planning[step]:
-                    print(f"Agent {self.unique_id} has a potential conflict with agent {nearby_agent.unique_id} at time step {step} on cell {self.planning[step]}!")
-
-
+            for step in self.plan: 
+                if self.plan[step] == nearby_agent.plan[step]:
+                    print(f"Agent {self.unique_id} has a potential conflict with agent {nearby_agent.unique_id} at time step {step} on cell {self.plan[step]}!")
+                    self.collision_agents.append(nearby_agent)
+                
 

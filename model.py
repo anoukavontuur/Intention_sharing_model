@@ -36,5 +36,9 @@ class IntentionSharingModel(mesa.Model):
                 self.grid[coordinate].paths += 1.0
    
     def step(self):
+        self.agents_by_type[VesselAgent].do("detect_collision", radius=4)
+        for a in self.agents_by_type[VesselAgent]:
+            print(f"collision agents for agent {a.unique_id}: {a.collision_agents}")
+
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()

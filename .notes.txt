@@ -1,0 +1,23 @@
+Vessel1 = self.agents.select(lambda a: a.unique_id == 1)
+Vessel1.do("set_path", graph=self.gridgraph)
+
+Vessel2 = self.agents.select(lambda a: a.unique_id == 2)
+Vessel2.do("set_path", graph=self.gridgraph, reservation_table=Vessel1[0].reservation_table)
+
+# Create structured agents
+VesselAgent.create_agents(
+    self,
+    self.number_of_vessels,
+    start_cell=[self.grid[pos] for pos in p.start_positions],
+    goal_cell=[self.grid[pos] for pos in p.goal_positions],
+    start_velocity=[v for v in p.start_velocities],
+)
+
+# Create random agents
+VesselAgent.create_agents(
+    self,
+    self.number_of_vessels,
+    start_cell=self.random.choices(self.grid.all_cells.cells, k=self.number_of_vessels),
+    goal_cell=self.random.choices(self.grid.all_cells.cells, k=self.number_of_vessels),
+    start_velocity= 1
+)
