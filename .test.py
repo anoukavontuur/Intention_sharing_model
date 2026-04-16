@@ -1,46 +1,47 @@
-from pathfinding import GridGraph, reconstruct_k_paths, spacetime_A_star_search
-
-Mygraph = GridGraph(5, 5)
+from Grid import GridGraph
+from pathfinding import Pathspace, spacetime_A_star_path
 
 class TestAgent():
     def __init__(self, start_state, goal_xy):
         self.start_state = start_state
         self.goal_xy = goal_xy
+        self.path = []
     
-    def plan_path(self, graph, reservation_table=None):
-        self.came_from, goal_state, self.cost_so_far = spacetime_A_star_search(
-            graph, 
-            self.start_state, 
-            self.goal_xy, 
-            max_goals=5, 
-            reservation_table=reservation_table
-            )
+    def set_pathspace(self, graph):
+        self.pathspace = Pathspace(graph, self.start_state, self.goal_xy)
         
-        self.paths, self.plans = reconstruct_k_paths(
-            self.came_from, 
-            self.start_state, 
-            goal_state, 
-            self.cost_so_far
-            )
+    def set_path(self):
+        self.path = self.pathspace.path()
+
+    def generate_alternative_path(self, graph, reservation_table):
+        self.path = spacetime_A_star_path(graph, self.start_state, self.goal_xy, reservation_table)
+
+def detect_conflicts(path1, path2):
+    for step1 in path1:
+        for step2 in path2:
+            if step1 == step2:
+                print(f"Conflict at time step {step1[1]} on cell {step1[0]}!")
+                return True 
+    return False
+
+Mygraph = GridGraph(5, 5)
 
 Agent1 = TestAgent(((0, 0), 0), (4, 4))
-Agent1.plan_path(Mygraph)
+Agent1.set_pathspace(Mygraph)
+Agent1.set_path()
+print(f"Agent 1 path: {Agent1.path}")
 
-for destination, origin in Agent1.came_from.items():
-    if destination[0] == (2, 2):
-        print(f"From {origin} to {destination}")
+Agent2 = TestAgent(((4, 0), 0), (0, 4))
+Agent2.set_pathspace(Mygraph)
+Agent2.set_path()
+print(f"Agent 2 path: {Agent2.path}")
 
-for n in range(len(Agent1.plans)):
-    print(f"Path {n}: {Agent1.plans[n]}")
+if detect_conflicts(Agent1.path, Agent2.path): 
+    Agent1.generate_alternative_path(Mygraph, reservation_table=Agent2.path)
 
-for goal, cost in Agent1.cost_so_far.items():
-    if goal[0] == (2, 2):
-        print(f"Cost to reach {goal}: {cost}")
+detect_conflicts(Agent1.path, Agent2.path)
 
 
-# Agent2 = TestAgent(((4, 0), 0), (0, 4))
-# Agent2.plan_path(Mygraph)
-# print("Planned paths for Agent 2:", Agent2.paths)
 
 
 

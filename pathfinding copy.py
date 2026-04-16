@@ -1,4 +1,3 @@
-from Grid import GridGraph
 import heapq
 
 class PriorityQueue:
@@ -113,12 +112,12 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=5):
     
     return A, B
     
+
 class Pathspace():
     def __init__(self, graph, start_state, goal_xy):
         A, B = Yens_algorithm(graph, start_state, goal_xy)
         self.pathspace = PriorityQueue()
-        for path in A:
-            self.pathspace.put(path, 0)
+        self.pathspace.put(A, 0)
         for path in B:
             self.pathspace.put(path, len(path))
             
@@ -130,8 +129,3 @@ class Pathspace():
             return None
         return self.pathspace.get()
 
-MyGrid = GridGraph(5, 5)
-start_state = ((0, 0), 0)
-goal_xy = (4, 4)
-pathspace = Pathspace(MyGrid, start_state, goal_xy)
-print("Best path:", pathspace.path())
