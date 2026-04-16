@@ -23,22 +23,27 @@ class IntentionSharingModel(mesa.Model):
         )
 
         # Initial path planning for all agents
-        self.agents_by_type[VesselAgent].do("set_path", graph=self.gridgraph)
+        self.agents_by_type[VesselAgent].do("set_pathspace", graph=self.gridgraph)
+        self.agents_by_type[VesselAgent].do("set_path")
 
         # Visualize planned paths on a property layer
         self.grid.create_property_layer("paths", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
+        
 
     def refresh_paths_layer(self):
         self.grid.set_property("paths", 0.0)
         for vessel in self.agents_by_type[VesselAgent]:
-            for coordinate in vessel.plan.values():  # plan is a dict {t: (x, y)}
-                self.grid[coordinate].paths += 1.0
+            for step in vessel.path:
+                self.grid[step[0]].paths += 1.0
    
     def step(self):
-        self.agents_by_type[VesselAgent].do("detect_collision", radius=4)
-        for a in self.agents_by_type[VesselAgent]:
-            print(f"collision agents for agent {a.unique_id}: {a.collision_agents}")
+        for agent in self.agents_by_type[VesselAgent]:
+            if agent.detect_collision(radius=4):
+                print("Collision detected! Agents will replan their paths.")
+                for collision_agent in agent.collision_agents:
+                    agent.generate_alternative_path(graph=self.gridgraph, reservation_table=collision_agent.path)
 
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()
+
