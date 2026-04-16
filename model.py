@@ -26,23 +26,26 @@ class IntentionSharingModel(mesa.Model):
         self.agents_by_type[VesselAgent].do("set_pathspace", graph=self.gridgraph)
         self.agents_by_type[VesselAgent].do("set_path")
 
-        # Visualize planned paths on a property layer
-        self.grid.create_property_layer("paths", default_value=0.0, dtype=float)
+        # Visualize each planned path on its own property layer
+        for vessel in self.agents_by_type[VesselAgent]:
+            self.grid.create_property_layer(f"path_{vessel.unique_id}", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
         
 
     def refresh_paths_layer(self):
-        self.grid.set_property("paths", 0.0)
         for vessel in self.agents_by_type[VesselAgent]:
+            layer_name = f"path_{vessel.unique_id}"
+            self.grid.set_property(layer_name, 0.0)
             for step in vessel.path:
-                self.grid[step[0]].paths += 1.0
+                cell = self.grid[step[0]]
+                setattr(cell, layer_name, getattr(cell, layer_name) + 1.0)
    
     def step(self):
-        for agent in self.agents_by_type[VesselAgent]:
-            if agent.detect_collision(radius=4):
-                print("Collision detected! Agents will replan their paths.")
-                for collision_agent in agent.collision_agents:
-                    agent.generate_alternative_path(graph=self.gridgraph, reservation_table=collision_agent.path)
+        for vessel in self.agents_by_type[VesselAgent]:
+            if vessel.detect_collision(radius=4):
+                print("Collision detected! Vessels will replan their paths.")
+                for collision_vessel in vessel.collision_agents:
+                    vessel.generate_alternative_path(graph=self.gridgraph, reservation_table=collision_vessel.path)
 
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()
