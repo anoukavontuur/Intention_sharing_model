@@ -26,7 +26,7 @@ def detect_conflicts(path1, path2):
 
 Mygraph = GridGraph(5, 5)
 
-Agent1 = TestAgent(((0, 0), 0), (4, 4))
+Agent1 = TestAgent(((0, 0), 0), (4, 4))   
 Agent1.set_pathspace(Mygraph)
 Agent1.set_path()
 print(f"Agent 1 path: {Agent1.path}")
@@ -38,8 +38,12 @@ print(f"Agent 2 path: {Agent2.path}")
 
 if detect_conflicts(Agent1.path, Agent2.path): 
     Agent1.generate_alternative_path(Mygraph, reservation_table=Agent2.path)
+    print(f"Agent 1 new path: {Agent1.path}")
 
-detect_conflicts(Agent1.path, Agent2.path)
+if not detect_conflicts(Agent1.path, Agent2.path):
+    print("No conflicts detected after replanning.")
+
+
 
 
 

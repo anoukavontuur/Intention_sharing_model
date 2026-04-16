@@ -44,7 +44,6 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         if current_xy == goal_xy:
             goal_state = current_state
             break
-
         
         # Generate space-time successors
         for next_state in graph.neighbors(current_xy, current_t, goal_xy):
@@ -130,8 +129,3 @@ class Pathspace():
             return None
         return self.pathspace.get()
 
-MyGrid = GridGraph(5, 5)
-start_state = ((0, 0), 0)
-goal_xy = (4, 4)
-pathspace = Pathspace(MyGrid, start_state, goal_xy)
-print("Best path:", pathspace.path())
