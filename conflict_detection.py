@@ -15,9 +15,6 @@ def _segments_cross(a, b, c, d):
 def has_conflict(path1, path2):
     edges1 = [(path1[i-1], path1[i]) for i in range(1, len(path1))]
     edges2 = [(path2[i-1], path2[i]) for i in range(1, len(path2))]
-    print("Edges:")
-    print(edges1)
-    print(edges2)
 
     #Vertex conflict
     for step in path1:
