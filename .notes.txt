@@ -21,3 +21,19 @@ VesselAgent.create_agents(
     goal_cell=self.random.choices(self.grid.all_cells.cells, k=self.number_of_vessels),
     start_velocity= 1
 )
+
+# Swapping test:
+start_positions = [(0, 4), (7, 4)]
+goal_positions = [(7, 4), (0, 4)]
+
+# Following test
+start_positions = [(3, 0), (0, 4)]
+goal_positions = [(3, 8), (8, 4)]
+
+# Vertex test 
+start_positions = [(0, 0), (8, 0)]
+goal_positions = [(8, 8), (0, 8)]
+
+# crossing test
+start_positions = [(0, 0), (7, 0)]
+goal_positions = [(7, 7), (0, 7)]

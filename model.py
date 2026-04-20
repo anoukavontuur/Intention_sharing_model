@@ -42,7 +42,7 @@ class IntentionSharingModel(mesa.Model):
    
     def step(self):
         for vessel in self.agents_by_type[VesselAgent]:
-            if vessel.detect_collision(radius=4):
+            if vessel.detect_collision(radius=p.detection_radius):
                 print("Collision detected! Vessels will replan their paths.")
                 for collision_vessel in vessel.collision_agents:
                     vessel.generate_alternative_path(graph=self.gridgraph, reservation_table=collision_vessel.path)

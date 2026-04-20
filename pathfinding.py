@@ -1,6 +1,6 @@
 from Grid import GridGraph
 import heapq
-from collections import defaultdict
+from conflict_detection import has_conflict
 
 class PriorityQueue:
     def __init__(self):
@@ -22,45 +22,9 @@ def heuristic(a, b):
     (x2, y2) = b
     return abs(x1 - x2) + abs(y1 - y2)
 
-
-def _orientation(a, b, c):
-    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
-
-
-def _segments_cross(a, b, c, d):
-    if a == c or a == d or b == c or b == d:
-        return False
-
-    o1 = _orientation(a, b, c)
-    o2 = _orientation(a, b, d)
-    o3 = _orientation(c, d, a)
-    o4 = _orientation(c, d, b)
-
-    return (o1 > 0) != (o2 > 0) and (o3 > 0) != (o4 > 0)
-
-
-def has_edge_conflict(current_state, next_state, reservation_table):
-    edge_reservations = [(reservation_table[i-1][0], reservation_table[i][0]) for i in range(1, len(reservation_table))]
-    current_xy = current_state[0]
-    next_xy = next_state[0]
-
-    for reserved_start_xy, reserved_end_xy in edge_reservations:
-        if (
-            (current_xy == reserved_start_xy and next_xy == reserved_end_xy)
-            or (current_xy == reserved_end_xy and next_xy == reserved_start_xy)
-        ):
-            return True
-
-        if _segments_cross(current_xy, next_xy, reserved_start_xy, reserved_end_xy):
-            return True
-
-    return False
-
-
 def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None):
     if reservation_table is None:
         reservation_table = {}
-
       
     frontier = PriorityQueue()
     frontier.put(start_state, 0)
@@ -85,11 +49,7 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         for next_state in graph.neighbors(current_xy, current_t, goal_xy):
             # next_state = ((next_x, next_y), next_t)
            
-            # Check if this state is reserved by another agent
-            if next_state in reservation_table:
-                continue
-
-            if has_edge_conflict(current_state, next_state, reservation_table):
+            if has_conflict([current_state, next_state], reservation_table):
                 continue
 
             new_cost = cost_so_far[current_state] + 1

@@ -1,5 +1,6 @@
 from mesa.discrete_space import CellAgent
 from pathfinding import Pathspace, spacetime_A_star_path
+from conflict_detection import has_conflict
 
 class VesselAgent(CellAgent):
     def __init__(self, model, start_cell, goal_cell, start_velocity):
@@ -57,13 +58,11 @@ class VesselAgent(CellAgent):
         
         # Collision detection based on planned paths (space-time)
         for nearby_agent in self.nearby_agents:
-            print(f"Agent {self.unique_id} detects nearby agent {nearby_agent.unique_id} at cell {nearby_agent.cell.coordinate}.")
-            for step in self.path:
-                if step in nearby_agent.path:
-                    print(f"Agent {self.unique_id} has a potential conflict with agent {nearby_agent.unique_id} at time step {step[1]} on cell {step[0]}!")
-                    self.collision_agents.append(nearby_agent)
-                    return True
-                
-        return False
-                
+            if has_conflict(self.path, nearby_agent.path):
+                print(f"Collision detected between Vessel {self.unique_id} and Vessel {nearby_agent.unique_id}")
+                self.collision_agents.append(nearby_agent)
+                return True
+            
+        return False    
+
 

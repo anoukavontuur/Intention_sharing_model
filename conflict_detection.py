@@ -22,17 +22,18 @@ def has_conflict(path1, path2):
     #Vertex conflict
     for step in path1:
         if step in path2:
-            print(f"vertex conflict detected at: {step}")
+            return True
 
     #Edge conflict
     for edge1 in edges1:
         for edge2 in edges2:
             if _segments_cross(edge1[0][0], edge1[1][0], edge2[0][0], edge2[1][0]) and edge1[0][1] == edge2[0][1]: 
-                print(f"crossing detected between edges:", edge1, "and", edge2)
+                return True
 
     #Following conflict
     for edge1 in edges1:
         for edge2 in edges2:
             if (edge1[0][0] == edge2[1][0] or edge1[1][0] == edge2[0][0]) and edge1[0][1] == edge2[0][1]:
-                print(f"following conflict detected between edges:", edge1, "and", edge2)
+                return True
 
+    return False
