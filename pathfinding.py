@@ -86,30 +86,31 @@ def spacetime_A_star_path(graph, start_state, goal_xy, reservation_table=None):
 
     return path
 
-def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=5):
+def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=10):
     A = [spacetime_A_star_path(graph, start_state, goal_xy, reservation_table)]
     B = []
 
     for k_i in range(1, k):
-       last_path = A[-1]
+        previous_path = A[-1]
 
-       for i in range(len(last_path) - 1):
-           spur_node = last_path[i]
-           root_path = last_path[:i + 1]
-           reservation_table = []
+        for i in range(len(previous_path) - 1):
+            spur_node = previous_path[i]
+            root_path = previous_path[:i + 1]
+            blocked_next_states = []
 
-           for path in A:
-               if len(path) > i and path[:i + 1] == root_path:
-                   reservation_table.append(path[i + 1])
+            for path in A:
+                if len(path) > i and path[:i + 1] == root_path:
+                    blocked_next_states.append(path[i + 1])
 
-           # Calculate the spur path from the spur node to the goal
-           spur_path = spacetime_A_star_path(graph, spur_node, goal_xy, reservation_table)
+            spur_path = spacetime_A_star_path(graph, spur_node, goal_xy, blocked_next_states)
 
-           # If a valid spur path is found, add it to the list of potential paths
-           if spur_path:
-               total_path = root_path[:-1] + spur_path
-               B.append(total_path)
-    
+            total_path = root_path[:-1] + spur_path
+            B.append(total_path)
+
+        next_path = min(B, key=len)
+        B.remove(next_path)
+        A.append(next_path)
+
     return A, B
     
 class Pathspace():
@@ -117,9 +118,9 @@ class Pathspace():
         A, B = Yens_algorithm(graph, start_state, goal_xy)
         self.pathspace = PriorityQueue()
         for path in A:
-            self.pathspace.put(path, 0)
-        for path in B:
             self.pathspace.put(path, len(path))
+        # for path in B:
+        #     self.pathspace.put(path, len(path))
             
     def add_path(self, path):
         self.pathspace.put(path, len(path))
@@ -128,4 +129,8 @@ class Pathspace():
         if self.pathspace.empty():
             return None
         return self.pathspace.get()
+    
+    def empty(self):
+        return self.pathspace.empty()
+    
 
