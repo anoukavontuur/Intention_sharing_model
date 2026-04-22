@@ -11,6 +11,7 @@ VesselAgent.create_agents(
     start_cell=[self.grid[pos] for pos in p.start_positions],
     goal_cell=[self.grid[pos] for pos in p.goal_positions],
     start_velocity=[v for v in p.start_velocities],
+    tokens=[t for t in p.tokens]
 )
 
 # Create random agents
@@ -20,20 +21,39 @@ VesselAgent.create_agents(
     start_cell=self.random.choices(self.grid.all_cells.cells, k=self.number_of_vessels),
     goal_cell=self.random.choices(self.grid.all_cells.cells, k=self.number_of_vessels),
     start_velocity= 1
+    tokens = 1
 )
 
 # Swapping test:
+number_of_vessels = 2
 start_positions = [(0, 4), (7, 4)]
 goal_positions = [(7, 4), (0, 4)]
+start_velocities = [1, 1]
+tokens = [1, 0]
 
 # Following test
+number_of_vessels = 2
 start_positions = [(3, 0), (0, 4)]
 goal_positions = [(3, 8), (8, 4)]
+start_velocities = [1, 1]
+tokens = [1, 0]
 
 # Vertex test 
+number_of_vessels = 2
 start_positions = [(0, 0), (8, 0)]
 goal_positions = [(8, 8), (0, 8)]
+start_velocities = [1, 1]
+tokens = [1, 0]
 
 # crossing test
+number_of_vessels = 2
 start_positions = [(0, 0), (7, 0)]
 goal_positions = [(7, 7), (0, 7)]
+start_velocities = [1, 1]
+tokens = [1, 0]
+
+# 3 vessels
+start_positions = [(0, 0), (8, 0), (6, 0)]
+goal_positions = [(8, 8), (0, 8), (6, 8)]
+start_velocities = [1, 1, 1]
+tokens = [1, 0, 0]

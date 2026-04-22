@@ -1,11 +1,9 @@
-# Parameters
-number_of_vessels = 2
-
-# Swapping test:
-start_positions = [(0, 4), (7, 4)]
-goal_positions = [(7, 4), (0, 4)]
-start_velocities = [1, 1]
-tokens = [1, 0]
+# 3 vessels
+number_of_vessels = 3
+start_positions = [(0, 0), (8, 0), (6, 0)]
+goal_positions = [(8, 8), (0, 8), (6, 8)]
+start_velocities = [0, 1, 0]
+tokens = [0, 0, 2]
 
 detection_radius = 5
 
