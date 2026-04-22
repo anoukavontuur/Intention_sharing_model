@@ -1,58 +1,55 @@
 
-def negotiate(agent1, agent2, max_rounds=50):
-    offer1 = agent1.path
-    offer2 = agent2.path
+def negotiate(agenta, agentb, max_rounds=50):
+    offer1 = agenta.path
+    offer2 = agentb.path
 
     #set pathspace for both agents
-    agent1.set_pathspace()
-    agent2.set_pathspace()
+    agenta.set_pathspace()
+    agentb.set_pathspace()
 
     print("\nInitial offers:")
-    print(f"Agent 1: {offer1}")
-    print(f"Agent 2: {offer2}")
+    print(f"Vessel {agenta.unique_id}: {offer1}")
+    print(f"Vessel {agentb.unique_id}: {offer2}")
 
     for round in range(max_rounds):
         print(f"\nRound {round + 1}:")
 
-        action1, new_offer1 = agent1.make_offer(offer2)
-        print(f"Agent 1 action: {action1}, offer: {new_offer1}")
+        action1, offer1 = agenta.make_offer(offer2)
+        print(f"Vessel {agenta.unique_id} action: {action1}, offer: {offer1}")
      
         if action1 == "accept":
-            resolve(agent1, agent2, winner=1)
+            resolve(agenta, agentb, winner=1)
             return
 
-        action2, new_offer2 = agent2.make_offer(offer1)
-        print(f"Agent 2 action: {action2}, offer: {new_offer2}")
+        action2, offer2 = agentb.make_offer(offer1)
+        print(f"Vessel {agentb.unique_id} action: {action2}, offer: {offer2}")
 
         if action2 == "accept":
-            resolve(agent1, agent2, winner=2)
+            resolve(agenta, agentb, winner=2)
             return
         
-        offer1 = new_offer1
-        offer2 = new_offer2
-
-    resolve(agent1, agent2, winner=0)
+    resolve(agenta, agentb, winner=0)
     
-def resolve(agent1, agent2, winner):
+def resolve(agenta, agentb, winner):
     if winner == 1:
-        payment = agent1.offered_tokens
-        agent1.tokens -= payment
-        agent2.tokens += payment
-        #agent2.path = agent2.generate_alt_path(agent1.path)
-        print(f"Agent 1 accepts Agent 2's offer")
-        print(f"Agent 1 pays {payment} tokens to Agent 2")
-        print(f"Agent 1 new token count: {agent1.tokens}")
-        print(f"Agent 2 new token count: {agent2.tokens}")
+        payment = agenta.offered_tokens
+        agenta.tokens -= payment
+        agentb.tokens += payment
+        agentb.reservation_table = agenta.path
+        #agentb.path = agentb.generate_alt_path(agenta.path)
+        print(f"Vessel {agenta.unique_id} pays {payment} tokens to Vessel {agentb.unique_id}")
+        print(f"Vessel {agenta.unique_id} new token count: {agenta.tokens}")
+        print(f"Vessel {agentb.unique_id} new token count: {agentb.tokens}")
 
     elif winner == 2:
-        payment = agent2.offered_tokens
-        agent2.tokens -= payment
-        agent1.tokens += payment
-        #agent1.path = agent1.generate_alt_path(agent2.path)
-        print(f"Agent 2 accepts Agent 1's offer")
-        print(f"Agent 2 pays {payment} tokens to Agent 1")
-        print(f"Agent 1 new token count: {agent1.tokens}")
-        print(f"Agent 2 new token count: {agent2.tokens}")
-    
+        payment = agentb.offered_tokens
+        agentb.tokens -= payment
+        agenta.tokens += payment
+        agenta.reservation_table = agentb.path
+        #agenta.path = agenta.generate_alt_path(agentb.path)
+        print(f"Vessel {agentb.unique_id} pays {payment} tokens to Vessel {agenta.unique_id}")
+        print(f"Vessel {agenta.unique_id} new token count: {agenta.tokens}")
+        print(f"Vessel {agentb.unique_id} new token count: {agentb.tokens}")
+
     else:
         print("Negotiation failed, both agents keep their paths")

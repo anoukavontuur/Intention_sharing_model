@@ -14,6 +14,8 @@ class IntentionSharingModel(mesa.Model):
         self.grid = OrthogonalMooreGrid((width, height), torus=False, random=self.random)
         self.gridgraph = GridGraph(width, height)
 
+        print(f"\nInitializing model with {self.number_of_vessels} vessels.")
+
         # Create agents
         VesselAgent.create_agents(
             self,
@@ -29,7 +31,6 @@ class IntentionSharingModel(mesa.Model):
             self.grid.create_property_layer(f"path_{vessel.unique_id}", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
 
-
     def refresh_paths_layer(self):
         for vessel in self.agents_by_type[VesselAgent]:
             layer_name = f"path_{vessel.unique_id}"
@@ -39,7 +40,7 @@ class IntentionSharingModel(mesa.Model):
                 setattr(cell, layer_name, getattr(cell, layer_name) + 1.0)
    
     def step(self):
-        
+        print(f"\n--- Time step {self.time} ---")
         for vessel in self.agents_by_type[VesselAgent]:
             if vessel.detect_collision(radius=p.detection_radius):
                 for collision_agent in vessel.collision_agents:

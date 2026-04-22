@@ -19,7 +19,6 @@ class VesselAgent(CellAgent):
 
     def update_state(self):
         self.state = ((self.cell.coordinate), self.model.time)
-        print(f"Vessel {self.unique_id} state updated: {self.state}")
     
     def set_pathspace(self):
         self.pathspace = Pathspace(self.model.gridgraph, self.state, self.goal.coordinate)
@@ -27,8 +26,8 @@ class VesselAgent(CellAgent):
     def cost(self, path):
         return len(path)
 
-    def generate_alternative_path(self, reservation_table):
-        return spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate, reservation_table)    
+    def generate_alternative_path(self, opponent_offer):
+        return spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate, opponent_offer)    
         
     def move_along_path(self):
         current_time = self.model.time
@@ -60,7 +59,7 @@ class VesselAgent(CellAgent):
         # Collision detection based on planned paths (space-time)
         for nearby_agent in self.nearby_agents:
             if has_conflict(self.path, nearby_agent.path):
-                print(f"Collision detected between Vessel {self.unique_id} and Vessel {nearby_agent.unique_id}")
+                print(f"\nCollision detected between Vessel {self.unique_id} and Vessel {nearby_agent.unique_id}")
                 self.collision_agents.append(nearby_agent)
                 return True
             
@@ -68,15 +67,7 @@ class VesselAgent(CellAgent):
 
     def make_offer(self, opponent_offer):
         alt_path = self.generate_alternative_path(opponent_offer)
-        print(f"\nAgent {self.unique_id} evaluating offer:")
-        print(f"Current path: {self.path}, cost: {self.cost(self.path)}")
-        print(f"Alternative path: {alt_path}, cost: {self.cost(alt_path)}")
-        print(f"Tokens: {self.tokens}, Offered tokens: {self.offered_tokens}")
-        print(f"state: {self.state}\n")
-
-        # if not has_conflict(self.path, opponent_offer):
-        #     return "accept", self.path
-        
+       
         if self.cost(self.path) < self.cost(alt_path):
             if self.tokens - self.offered_tokens > 0:
                 self.offered_tokens += 1

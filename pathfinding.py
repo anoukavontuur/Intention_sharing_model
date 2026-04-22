@@ -101,7 +101,7 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=10):
             for path in A:
                 if len(path) > i and path[:i + 1] == root_path:
                     blocked_next_states.append(path[i + 1])
-
+            
             spur_path = spacetime_A_star_path(graph, spur_node, goal_xy, blocked_next_states)
 
             total_path = root_path[:-1] + spur_path
