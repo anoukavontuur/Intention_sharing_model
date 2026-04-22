@@ -119,6 +119,7 @@ class Pathspace():
         self.pathspace = PriorityQueue()
         for path in A:
             self.pathspace.put(path, len(path))
+        self.pathspace.get() # Remove the first path, which is the shortest path
         # for path in B:
         #     self.pathspace.put(path, len(path))
             

@@ -1,6 +1,7 @@
 from agents import VesselAgent
 from pathfinding import GridGraph
 import parameters as p
+from negotiation import negotiate
 
 import mesa
 from mesa.discrete_space import OrthogonalMooreGrid
@@ -20,17 +21,14 @@ class IntentionSharingModel(mesa.Model):
             start_cell=[self.grid[pos] for pos in p.start_positions],
             goal_cell=[self.grid[pos] for pos in p.goal_positions],
             start_velocity=[v for v in p.start_velocities],
+            tokens=[t for t in p.tokens]
         )
-
-        # Initial path planning for all agents
-        self.agents_by_type[VesselAgent].do("set_pathspace", graph=self.gridgraph)
-        self.agents_by_type[VesselAgent].do("set_path")
 
         # Visualize each planned path on its own property layer
         for vessel in self.agents_by_type[VesselAgent]:
             self.grid.create_property_layer(f"path_{vessel.unique_id}", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
-        
+
 
     def refresh_paths_layer(self):
         for vessel in self.agents_by_type[VesselAgent]:
@@ -41,11 +39,15 @@ class IntentionSharingModel(mesa.Model):
                 setattr(cell, layer_name, getattr(cell, layer_name) + 1.0)
    
     def step(self):
+        
         for vessel in self.agents_by_type[VesselAgent]:
             if vessel.detect_collision(radius=p.detection_radius):
-                for collision_vessel in vessel.collision_agents:
-                    vessel.generate_alternative_path(graph=self.gridgraph, reservation_table=collision_vessel.path)
-
+                for collision_agent in vessel.collision_agents:
+                    negotiate(vessel, collision_agent)
+        
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()
+
+        self.agents_by_type[VesselAgent].do("update_state")
+        
 
