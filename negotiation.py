@@ -1,5 +1,5 @@
 
-def negotiate(agenta, agentb, max_rounds=50):
+def negotiate(agenta, agentb):
     offer1 = agenta.path
     offer2 = agentb.path
 
@@ -11,8 +11,11 @@ def negotiate(agenta, agentb, max_rounds=50):
     print(f"Vessel {agenta.unique_id}: {offer1}")
     print(f"Vessel {agentb.unique_id}: {offer2}")
 
-    for round in range(max_rounds):
-        print(f"\nRound {round + 1}:")
+    round = 0
+
+    while not agenta.pathspace.empty() and not agentb.pathspace.empty():
+        round += 1
+        print(f"\nRound {round}:")
 
         action1, offer1 = agenta.make_offer(offer2)
         print(f"Vessel {agenta.unique_id} action: {action1}, offer: {offer1}")
