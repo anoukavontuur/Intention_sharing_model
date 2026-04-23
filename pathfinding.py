@@ -86,11 +86,13 @@ def spacetime_A_star_path(graph, start_state, goal_xy, reservation_table=None):
 
     return path
 
-def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=10):
+def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
     A = [spacetime_A_star_path(graph, start_state, goal_xy, reservation_table)]
     B = []
 
-    for k_i in range(1, k):
+    k = min(graph.width, graph.height)
+
+    for _ in range(1, k):
         previous_path = A[-1]
 
         for i in range(len(previous_path) - 1):
@@ -105,33 +107,22 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None, k=10):
             spur_path = spacetime_A_star_path(graph, spur_node, goal_xy, blocked_next_states)
 
             total_path = root_path[:-1] + spur_path
-            B.append(total_path)
+
+            if total_path not in A and total_path not in B:
+                B.append(total_path)
 
         next_path = min(B, key=len)
         B.remove(next_path)
         A.append(next_path)
 
-    return A, B
+    return A
     
-class Pathspace():
+class Pathspace(PriorityQueue):
     def __init__(self, graph, start_state, goal_xy):
-        A, B = Yens_algorithm(graph, start_state, goal_xy)
-        self.pathspace = PriorityQueue()
+        super().__init__()
+        A = Yens_algorithm(graph, start_state, goal_xy)
         for path in A:
-            self.pathspace.put(path, len(path))
-        self.pathspace.get() # Remove the first path, which is the shortest path
-        # for path in B:
-        #     self.pathspace.put(path, len(path))
-            
-    def add_path(self, path):
-        self.pathspace.put(path, len(path))
-        
-    def path(self):
-        if self.pathspace.empty():
-            return None
-        return self.pathspace.get()
-    
-    def empty(self):
-        return self.pathspace.empty()
-    
+            self.put(path, len(path))
+        self.get() # Remove the first path, which is the shortest path
+
 

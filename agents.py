@@ -73,7 +73,7 @@ class VesselAgent(CellAgent):
                 self.offered_tokens += 1
                 return "keep", self.path
             else:
-                self.path = self.pathspace.path()
+                self.path = self.pathspace.get()
                 self.offered_tokens = 0
                 return "change", self.path
             
