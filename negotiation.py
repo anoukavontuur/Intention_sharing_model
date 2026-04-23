@@ -1,15 +1,15 @@
 
 def negotiate(agenta, agentb):
-    offer1 = agenta.path
-    offer2 = agentb.path
+    offer_a = agenta.path
+    offer_b = agentb.path
 
     #set pathspace for both agents
     agenta.set_pathspace()
     agentb.set_pathspace()
 
     print("\nInitial offers:")
-    print(f"Vessel {agenta.unique_id}: {offer1}")
-    print(f"Vessel {agentb.unique_id}: {offer2}")
+    print(f"Vessel {agenta.unique_id}: {offer_a}")
+    print(f"Vessel {agentb.unique_id}: {offer_b}")
 
     round = 0
 
@@ -17,42 +17,38 @@ def negotiate(agenta, agentb):
         round += 1
         print(f"\nRound {round}:")
 
-        action1, offer1 = agenta.make_offer(offer2)
-        print(f"Vessel {agenta.unique_id} action: {action1}, offer: {offer1}")
+        action_a, offer_a = agenta.make_offer(offer_b)
+        print(f"Vessel {agenta.unique_id} action: {action_a}, offer: {offer_a}")
      
-        if action1 == "accept":
-            resolve(agenta, agentb, winner=1)
+        if action_a == "accept":
+            print(f"Vessel {agenta.unique_id} accepts the offer from Vessel {agentb.unique_id}, vessel {agentb.unique_id} wins")
+            resolve(winner=agentb, offer=offer_b, loser=agenta)
             return
 
-        action2, offer2 = agentb.make_offer(offer1)
-        print(f"Vessel {agentb.unique_id} action: {action2}, offer: {offer2}")
+        action_b, offer_b = agentb.make_offer(offer_a)
+        print(f"Vessel {agentb.unique_id} action: {action_b}, offer: {offer_b}")
 
-        if action2 == "accept":
-            resolve(agenta, agentb, winner=2)
+        if action_b == "accept":
+            print(f"Vessel {agentb.unique_id} accepts the offer from Vessel {agenta.unique_id}, vessel {agenta.unique_id} wins")
+            resolve(winner=agenta, offer=offer_a, loser=agentb)
             return
         
-    resolve(agenta, agentb, winner=0)
-    
-def resolve(agenta, agentb, winner):
-    if winner == 1:
-        payment = agenta.offered_tokens
-        agenta.tokens -= payment
-        agentb.tokens += payment
-        agentb.reservation_table = agenta.path
-        #agentb.path = agentb.generate_alt_path(agenta.path)
-        print(f"Vessel {agenta.unique_id} pays {payment} tokens to Vessel {agentb.unique_id}")
-        print(f"Vessel {agenta.unique_id} new token count: {agenta.tokens}")
-        print(f"Vessel {agentb.unique_id} new token count: {agentb.tokens}")
+    print("\nNegotiation failed, both agents keep their paths")
 
-    elif winner == 2:
-        payment = agentb.offered_tokens
-        agentb.tokens -= payment
-        agenta.tokens += payment
-        agenta.reservation_table = agentb.path
-        #agenta.path = agenta.generate_alt_path(agentb.path)
-        print(f"Vessel {agentb.unique_id} pays {payment} tokens to Vessel {agenta.unique_id}")
-        print(f"Vessel {agenta.unique_id} new token count: {agenta.tokens}")
-        print(f"Vessel {agentb.unique_id} new token count: {agentb.tokens}")
+def resolve(winner, offer, loser):
+    #Payement
+    payement = winner.offered_tokens
+    winner.tokens -= payement
+    loser.tokens += payement
+    winner.offered_tokens = 0
+    loser.offered_tokens = 0
 
-    else:
-        print("Negotiation failed, both agents keep their paths")
+    #Paths
+    winner.path = offer
+    loser.path = loser.generate_alternative_path(offer)
+
+    #Prints
+    print(f"\nVessel {winner.unique_id} pays {payement} tokens to Vessel {loser.unique_id}")
+    print(f"Vessel {winner.unique_id} new token count: {winner.tokens}")
+    print(f"Vessel {loser.unique_id} new token count: {loser.tokens}")
+
