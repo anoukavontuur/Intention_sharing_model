@@ -27,7 +27,15 @@ class VesselAgent(CellAgent):
         return len(path)
 
     def generate_alternative_path(self, opponent_offer):
-        return spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate, opponent_offer)    
+        return spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate, opponent_offer) 
+
+    def wait_path(self):
+        (x, y) = self.state[0]
+        t = self.state[1]
+        wait_step = ((x, y), t + 1)
+        continue_path = spacetime_A_star_path(self.model.gridgraph, wait_step, self.goal.coordinate)
+        return [wait_step] + continue_path
+
         
     def move_along_path(self):
         current_time = self.model.time
@@ -67,6 +75,10 @@ class VesselAgent(CellAgent):
 
     def make_offer(self, opponent_offer):
         alt_path = self.generate_alternative_path(opponent_offer)
+
+        if alt_path == []:
+            self.path = self.wait_path()
+            return "wait", self.path
        
         if self.cost(self.path) < self.cost(alt_path):
             if self.tokens - self.offered_tokens > 0:
