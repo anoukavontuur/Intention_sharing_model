@@ -1,0 +1,7 @@
+.notes.txt
+__pycache__/agents.cpython-314.pyc
+__pycache__/conflict_detection.cpython-314.pyc
+__pycache__/model.cpython-314.pyc
+__pycache__/negotiation.cpython-314.pyc
+__pycache__/parameters.cpython-314.pyc
+__pycache__/pathfinding.cpython-314.pyc
