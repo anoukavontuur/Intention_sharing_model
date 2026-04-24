@@ -20,7 +20,9 @@ def heuristic(a, b):
     """Spatial heuristic: Manhattan distance between two 2D positions."""
     (x1, y1) = a
     (x2, y2) = b
-    return abs(x1 - x2) + abs(y1 - y2)
+    dx = abs(x1 - x2)
+    dy = abs(y1 - y2)
+    return (dx * dx + dy * dy)**0.5 # Euclidean distance
 
 def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None):
     if reservation_table is None:
@@ -48,11 +50,19 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         # Generate space-time successors
         for next_state in graph.neighbors(current_xy, current_t, goal_xy):
             # next_state = ((next_x, next_y), next_t)
+            next_xy = next_state[0]
+            next_t = next_state[1]
            
             if has_conflict([current_state, next_state], reservation_table):
                 continue
 
-            new_cost = cost_so_far[current_state] + 1
+            dx = next_xy[0] - current_xy[0]
+            dy = next_xy[1] - current_xy[1]
+
+            if abs(dx) and abs(dy): 
+                new_cost = cost_so_far[current_state] + 1.4  # Diagonal move
+            else:
+                new_cost = cost_so_far[current_state] + 1
             
             if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
                 cost_so_far[next_state] = new_cost
@@ -62,6 +72,18 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         
     return came_from, goal_state
 
+def path_cost(path):
+    total_cost = 0.0
+    edges = [(path[i-1], path[i]) for i in range(1, len(path))]
+
+    for edge in edges:
+        dx = edge[1][0][0] - edge[0][0][0]
+        dy = edge[1][0][1] - edge[0][0][1]
+        if abs(dx) and abs(dy):
+            total_cost += 1.4  # Diagonal move
+        else:
+            total_cost += 1    
+    return round(total_cost, 2)
 
 def spacetime_A_star_path(graph, start_state, goal_xy, reservation_table=None):
 
@@ -111,7 +133,7 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
             if total_path not in A and total_path not in B:
                 B.append(total_path)
 
-        next_path = min(B, key=len)
+        next_path = min(B, key = lambda p: path_cost(p))
         B.remove(next_path)
         A.append(next_path)
 
@@ -122,7 +144,7 @@ class Pathspace(PriorityQueue):
         super().__init__()
         A = Yens_algorithm(graph, start_state, goal_xy)
         for path in A:
-            self.put(path, len(path))
+            self.put(path, path_cost(path))
         self.get() # Remove the first path, which is the shortest path
 
 

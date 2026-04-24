@@ -1,7 +1,7 @@
 from mesa.discrete_space import CellAgent
 import parameters as p
 from negotiation import negotiate
-from pathfinding import Pathspace, spacetime_A_star_path
+from pathfinding import Pathspace, spacetime_A_star_path, path_cost
 from conflict_detection import has_conflict
 
 class VesselAgent(CellAgent):
@@ -11,7 +11,7 @@ class VesselAgent(CellAgent):
         self.goal = goal_cell
         self.state = ((self.cell.coordinate), self.model.time)  # (x, y), t
         self.velocity = start_velocity
-        self.movement_buffer = 0
+        self.collision = False
 
         self.path = spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate)
         print(f"Vessel {self.unique_id} initial path: {self.path}")
@@ -26,7 +26,7 @@ class VesselAgent(CellAgent):
         self.pathspace = Pathspace(self.model.gridgraph, self.state, self.goal.coordinate)
     
     def cost(self, path):
-        return len(path)
+        return path_cost(path)
 
     def generate_alternative_path(self, opponent_offer):
         return spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate, opponent_offer) 
@@ -45,8 +45,9 @@ class VesselAgent(CellAgent):
         if not self.path:
             return  # No path to follow
         
-        if self.detect_collision(radius=p.detection_radius):
+        if self.collision:
             self.path = self.wait_path()
+            
         for i, step in enumerate(self.path):
             if step[1] == current_time:
                 (x, y) = step[0]
@@ -73,8 +74,10 @@ class VesselAgent(CellAgent):
             if has_conflict(self.path, nearby_agent.path):
                 print(f"\nCollision detected between Vessel {self.unique_id} and Vessel {nearby_agent.unique_id}")
                 self.collision_agents.append(nearby_agent)
+                self.collision = True
                 return True
-            
+        
+        self.collision = False
         return False
 
     def make_offer(self, opponent_offer):
@@ -83,7 +86,8 @@ class VesselAgent(CellAgent):
         if alt_path == []:
             self.path = self.wait_path()
             return "wait", self.path
-       
+        
+        print(f"Vessel {self.unique_id} evaluating offer: \ncurrent path cost = {self.cost(self.path)} \nalternative path cost = {self.cost(alt_path)}, \ntokens = {self.tokens}, \noffered tokens = {self.offered_tokens}")
         if self.cost(self.path) < self.cost(alt_path):
             if self.tokens - self.offered_tokens > 0:
                 self.offered_tokens += 1

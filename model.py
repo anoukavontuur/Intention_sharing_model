@@ -41,11 +41,13 @@ class IntentionSharingModel(mesa.Model):
    
     def step(self):
         print(f"\n--- Time step {self.time} ---")
+        # 1. Detect conflicts and negotiate if necessary
         self.agents_by_type[VesselAgent].shuffle_do("collision_avoidance")
+        self.agents_by_type[VesselAgent].shuffle_do("detect_collision", radius=p.detection_radius)
+        self.agents_by_type[VesselAgent].shuffle_do("move_along_path")
         
-        self.agents_by_type[VesselAgent].do("move_along_path")
+        # 2. Update paths and states
         self.refresh_paths_layer()
-
-        self.agents_by_type[VesselAgent].do("update_state")
+        self.agents_by_type[VesselAgent].shuffle_do("update_state")
         
 
