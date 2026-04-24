@@ -90,7 +90,7 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
     A = [spacetime_A_star_path(graph, start_state, goal_xy, reservation_table)]
     B = []
 
-    k = min(graph.width, graph.height)
+    k = min(graph.width, graph.height, 10)
 
     for _ in range(1, k):
         previous_path = A[-1]

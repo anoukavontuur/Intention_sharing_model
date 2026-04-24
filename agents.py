@@ -44,7 +44,9 @@ class VesselAgent(CellAgent):
 
         if not self.path:
             return  # No path to follow
-
+        
+        if self.detect_collision(radius=p.detection_radius):
+            self.path = self.wait_path()
         for i, step in enumerate(self.path):
             if step[1] == current_time:
                 (x, y) = step[0]
