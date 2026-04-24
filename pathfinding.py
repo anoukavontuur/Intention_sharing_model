@@ -24,6 +24,19 @@ def heuristic(a, b):
     dy = abs(y1 - y2)
     return (dx * dx + dy * dy)**0.5 # Euclidean distance
 
+def path_cost(path):
+    total_cost = 0.0
+    edges = [(path[i-1], path[i]) for i in range(1, len(path))]
+
+    for edge in edges:
+        dx = edge[1][0][0] - edge[0][0][0]
+        dy = edge[1][0][1] - edge[0][0][1]
+        if abs(dx) and abs(dy):
+            total_cost += 1.4  # Diagonal move
+        else:
+            total_cost += 1    
+    return round(total_cost, 2)
+
 def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None):
     if reservation_table is None:
         reservation_table = {}
@@ -49,20 +62,11 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         
         # Generate space-time successors
         for next_state in graph.neighbors(current_xy, current_t, goal_xy):
-            # next_state = ((next_x, next_y), next_t)
-            next_xy = next_state[0]
-            next_t = next_state[1]
            
             if has_conflict([current_state, next_state], reservation_table):
                 continue
 
-            dx = next_xy[0] - current_xy[0]
-            dy = next_xy[1] - current_xy[1]
-
-            if abs(dx) and abs(dy): 
-                new_cost = cost_so_far[current_state] + 1.4  # Diagonal move
-            else:
-                new_cost = cost_so_far[current_state] + 1
+            new_cost = cost_so_far[current_state] + path_cost([current_state, next_state])
             
             if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
                 cost_so_far[next_state] = new_cost
@@ -72,18 +76,6 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
         
     return came_from, goal_state
 
-def path_cost(path):
-    total_cost = 0.0
-    edges = [(path[i-1], path[i]) for i in range(1, len(path))]
-
-    for edge in edges:
-        dx = edge[1][0][0] - edge[0][0][0]
-        dy = edge[1][0][1] - edge[0][0][1]
-        if abs(dx) and abs(dy):
-            total_cost += 1.4  # Diagonal move
-        else:
-            total_cost += 1    
-    return round(total_cost, 2)
 
 def spacetime_A_star_path(graph, start_state, goal_xy, reservation_table=None):
 
