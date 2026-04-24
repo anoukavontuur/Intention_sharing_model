@@ -51,9 +51,10 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
     goal_state = None
     
     while not frontier.empty():
-        current_state = frontier.get()  # current_state = ((x, y), t)
+        current_state = frontier.get()  # current_state = ((x, y), t, heading)
         current_xy = current_state[0]   #(x, y)
         current_t = current_state[1]    #t
+        current_heading = current_state[2]  # heading
         
         # Check if goal is reached (any time is acceptable)
         if current_xy == goal_xy:
@@ -61,7 +62,7 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
             break
         
         # Generate space-time successors
-        for next_state in graph.neighbors(current_xy, current_t, goal_xy):
+        for next_state in graph.neighbors(current_xy, current_t, goal_xy, current_heading):
            
             if has_conflict([current_state, next_state], reservation_table):
                 continue
@@ -138,5 +139,21 @@ class Pathspace(PriorityQueue):
         for path in A:
             self.put(path, path_cost(path))
         self.get() # Remove the first path, which is the shortest path
+
+# TESTING
+# testgraph = GridGraph(9, 9)
+# start_state = ((0, 0), 0, 0) # (x, y), t, heading
+# goal_xy = (8, 8)
+# path = spacetime_A_star_path(testgraph, start_state, goal_xy)
+# print("Shortest path:", path)
+# print("Cost of shortest path:", path_cost(path))
+# print(path)
+
+# pathspace = Pathspace(testgraph, start_state, goal_xy)
+# while not pathspace.empty():
+#     next_path = pathspace.get()
+#     print("Next path:", next_path)
+#     print("Cost of next path:", path_cost(next_path))
+
 
 

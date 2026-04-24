@@ -5,11 +5,12 @@ from pathfinding import Pathspace, spacetime_A_star_path, path_cost
 from conflict_detection import has_conflict
 
 class VesselAgent(CellAgent):
-    def __init__(self, model, start_cell, goal_cell, start_velocity, tokens):
+    def __init__(self, model, start_cell, goal_cell, start_heading, start_velocity, tokens):
         super().__init__(model)
         self.cell = start_cell
         self.goal = goal_cell
-        self.state = ((self.cell.coordinate), self.model.time)  # (x, y), t
+        self.heading = start_heading
+        self.state = ((self.cell.coordinate), self.model.time, self.heading)  # (x, y), t, heading
         self.velocity = start_velocity
         self.collision = False
 
@@ -20,7 +21,7 @@ class VesselAgent(CellAgent):
         self.offered_tokens = 0
 
     def update_state(self):
-        self.state = ((self.cell.coordinate), self.model.time)
+        self.state = ((self.cell.coordinate), self.model.time, self.heading)
     
     def set_pathspace(self):
         self.pathspace = Pathspace(self.model.gridgraph, self.state, self.goal.coordinate)
@@ -34,7 +35,8 @@ class VesselAgent(CellAgent):
     def wait_path(self):
         (x, y) = self.state[0]
         t = self.state[1]
-        wait_step = ((x, y), t + 1)
+        heading = self.state[2]
+        wait_step = ((x, y), t + 1, heading)
         continue_path = spacetime_A_star_path(self.model.gridgraph, wait_step, self.goal.coordinate)
         return [wait_step] + continue_path
 

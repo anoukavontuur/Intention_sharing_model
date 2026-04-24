@@ -22,6 +22,7 @@ class IntentionSharingModel(mesa.Model):
             self.number_of_vessels,
             start_cell=[self.grid[pos] for pos in p.start_positions],
             goal_cell=[self.grid[pos] for pos in p.goal_positions],
+            start_heading=[h for h in p.start_headings],
             start_velocity=[v for v in p.start_velocities],
             tokens=[t for t in p.tokens]
         )
