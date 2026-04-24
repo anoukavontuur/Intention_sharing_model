@@ -65,7 +65,10 @@ def resolve(winner, offer, loser):
     print(f"Vessel {loser.unique_id} new token count: {loser.tokens}")
 
 def resolve_waiting(waiter, offer, other):
+    #Paths
     waiter.path = offer
     other.path = other.generate_alternative_path(offer)
+    
+    #Prints
     print(f"Vessel {waiter.unique_id} new path: {waiter.path}")
     print(f"Vessel {other.unique_id} new path: {other.path}")

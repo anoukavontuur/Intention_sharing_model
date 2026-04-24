@@ -41,10 +41,7 @@ class IntentionSharingModel(mesa.Model):
    
     def step(self):
         print(f"\n--- Time step {self.time} ---")
-        for vessel in self.agents_by_type[VesselAgent]:
-            if vessel.detect_collision(radius=p.detection_radius):
-                for collision_agent in vessel.collision_agents:
-                    negotiate(vessel, collision_agent)
+        self.agents_by_type[VesselAgent].shuffle_do("collision_avoidance")
         
         self.agents_by_type[VesselAgent].do("move_along_path")
         self.refresh_paths_layer()

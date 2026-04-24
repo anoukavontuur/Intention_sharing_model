@@ -1,4 +1,6 @@
 from mesa.discrete_space import CellAgent
+import parameters as p
+from negotiation import negotiate
 from pathfinding import Pathspace, spacetime_A_star_path
 from conflict_detection import has_conflict
 
@@ -93,5 +95,7 @@ class VesselAgent(CellAgent):
             self.path = alt_path
             return "accept", self.path
     
-
-
+    def collision_avoidance(self):
+        if self.detect_collision(radius=p.detection_radius):
+            for collision_agent in self.collision_agents:
+                negotiate(self, collision_agent)
