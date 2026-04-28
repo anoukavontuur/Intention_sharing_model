@@ -4,41 +4,48 @@ class GridGraph:
         self.height = height
         self.all_nodes = [(x, y) for x in range(width) for y in range(height)]
 
-    def neighbors(self, node, current_time, goal_xy, heading):
-        stay = (0, 0)
-
+    def neighbors(self, node, current_time, goal_xy, heading, velocity):
         all_directions = [
             (-1, 1), (0, 1), (1, 1), (1, 0),
             (1, -1), (0, -1), (-1, -1), (-1, 0)
         ]
 
+        v_min, v_max = 0, 3  # example limits
+
         result = []
 
-        # bepaal indices voor links, rechtdoor, rechts
-        indices = [
-            (heading - 1) % 8,  # links
-            heading,            # rechtdoor
-            (heading + 1) % 8   # rechts
+        # possible heading changes: left, straight, right
+        heading_indices = [
+            (heading - 1) % 8,
+            heading,
+            (heading + 1) % 8
         ]
 
-        possible_directions = [stay] + [all_directions[i] for i in indices]
-
-        for dx, dy in possible_directions:
+        # possible velocity changes
+        for dv in [-1, 0, 1]:
             if node == goal_xy:
                 continue
 
-            new_x = node[0] + dx
-            new_y = node[1] + dy
-            neighbour = (new_x, new_y)
+            v_new = velocity + dv
+            if v_new < v_min or v_new > v_max:
+                continue
 
-            if neighbour in self.all_nodes:
-                # nieuwe heading bepalen
-                if (dx, dy) == stay:
-                    new_heading = heading
-                else:
-                    new_heading = all_directions.index((dx, dy))
+            # allow standing still
+            if v_new == 0:
+                result.append((node, current_time + 1, heading, 0))
+                continue
 
-                result.append(((new_x, new_y), current_time + 1, new_heading))
+            dx, dy = all_directions[heading]
+            base_directions = (dx*(v_new-1), dy*(v_new-1))
+
+            for h in heading_indices:
+                x, y = node
+                base_x, base_y = base_directions
+                dx, dy = all_directions[h]
+
+                new_pos = (x + base_x + dx, y + base_y + dy)
+                if new_pos in self.all_nodes:
+                    result.append((new_pos, current_time + 1, h, v_new))
 
         return result
 

@@ -17,7 +17,7 @@ class PriorityQueue:
 
 
 def heuristic(a, b):
-    """Spatial heuristic: Manhattan distance between two 2D positions."""
+    """Spatial heuristic: Euclidean distance between two 2D positions."""
     (x1, y1) = a
     (x2, y2) = b
     dx = abs(x1 - x2)
@@ -25,19 +25,23 @@ def heuristic(a, b):
     return (dx * dx + dy * dy)**0.5 # Euclidean distance
 
 def path_cost(path):
-    total_cost = 0.0
+    total_cost = 0
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
 
     for edge in edges:
-        dx = edge[1][0][0] - edge[0][0][0]
-        dy = edge[1][0][1] - edge[0][0][1]
-        if abs(dx) and abs(dy):
-            total_cost += 1.4  # Diagonal move
-        else:
-            total_cost += 1    
+
+        a = edge[0][0]  # (x, y) of the first state
+        b = edge[1][0]  # (x, y) of the second
+
+        cost = heuristic(a, b)
+        if cost == 0:  
+            cost = 1  
+
+        total_cost += cost
+
     return round(total_cost, 2)
 
-def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None):
+def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None, horizon=50):
     if reservation_table is None:
         reservation_table = {}
       
@@ -51,10 +55,14 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
     goal_state = None
     
     while not frontier.empty():
-        current_state = frontier.get()  # current_state = ((x, y), t, heading)
+        current_state = frontier.get()  # current_state = ((x, y), t, heading, velocity)
         current_xy = current_state[0]   #(x, y)
         current_t = current_state[1]    #t
         current_heading = current_state[2]  # heading
+        current_velocity = current_state[3]  # velocity
+
+        if current_t > horizon:
+            break
         
         # Check if goal is reached (any time is acceptable)
         if current_xy == goal_xy:
@@ -62,7 +70,7 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
             break
         
         # Generate space-time successors
-        for next_state in graph.neighbors(current_xy, current_t, goal_xy, current_heading):
+        for next_state in graph.neighbors(current_xy, current_t, goal_xy, current_heading, current_velocity):
            
             if has_conflict([current_state, next_state], reservation_table):
                 continue
@@ -79,13 +87,13 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None)
 
 
 def spacetime_A_star_path(graph, start_state, goal_xy, reservation_table=None):
-
+    
     came_from, goal_state = spacetime_A_star_search(
         graph, 
         start_state, 
         goal_xy, 
         reservation_table)
-    
+       
     current = goal_state
     path = []
     
@@ -109,26 +117,41 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
 
     for _ in range(1, k):
         previous_path = A[-1]
+        
 
         for i in range(len(previous_path) - 1):
             spur_node = previous_path[i]
             root_path = previous_path[:i + 1]
             blocked_next_states = []
-
+           
             for path in A:
                 if len(path) > i and path[:i + 1] == root_path:
                     blocked_next_states.append(path[i + 1])
-            
+                        
             spur_path = spacetime_A_star_path(graph, spur_node, goal_xy, blocked_next_states)
+            if spur_path == []:
+                continue
 
             total_path = root_path[:-1] + spur_path
+
+            # print("\nIteration", _, i)
+            # print("Root path:", root_path)
+            # print("Spur node:", spur_node)
+            # print("Blocked next states:", blocked_next_states)
+            # print("Spur path:", spur_path)
+            # print("Total path:", total_path)
+            # print("Cost of total path:", path_cost(total_path))
 
             if total_path not in A and total_path not in B:
                 B.append(total_path)
 
         next_path = min(B, key = lambda p: path_cost(p))
+
+        # print("\nNext path added to A:", next_path)   
+        
         B.remove(next_path)
         A.append(next_path)
+  
 
     return A
     
@@ -141,19 +164,20 @@ class Pathspace(PriorityQueue):
         self.get() # Remove the first path, which is the shortest path
 
 # TESTING
-# testgraph = GridGraph(9, 9)
-# start_state = ((0, 0), 0, 0) # (x, y), t, heading
-# goal_xy = (8, 8)
-# path = spacetime_A_star_path(testgraph, start_state, goal_xy)
-# print("Shortest path:", path)
-# print("Cost of shortest path:", path_cost(path))
-# print(path)
+testgraph = GridGraph(9, 9)
+start_state = ((0, 0), 0, 0, 2) # (x, y), t, heading, velocity
+goal_xy = (8, 8)
+path = spacetime_A_star_path(testgraph, start_state, goal_xy)
+print("\nA* Path")
+print("Shortest path:", path)
+print("Cost of shortest path:", path_cost(path))
 
-# pathspace = Pathspace(testgraph, start_state, goal_xy)
-# while not pathspace.empty():
-#     next_path = pathspace.get()
-#     print("Next path:", next_path)
-#     print("Cost of next path:", path_cost(next_path))
+print("\nYen's K-Shortest Paths")
+pathspace = Pathspace(testgraph, start_state, goal_xy)
+while not pathspace.empty():
+    next_path = pathspace.get()
+    print("Next path:", next_path)
+    print("Cost of next path:", path_cost(next_path))
 
 
 
