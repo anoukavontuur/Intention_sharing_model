@@ -1,3 +1,5 @@
+from os import path
+
 from Grid import GridGraph
 import heapq
 from conflict_detection import has_conflict
@@ -26,18 +28,31 @@ def heuristic(a, b):
 
 def path_cost(path):
     total_cost = 0
+
+    v_optimal = 2          # preferred velocity
+    w_distance = 1.0       # weight for distance
+    w_velocity = 0.5       # penalty for wrong speed
+    w_acceleration = 1.0   # penalty for acceleration
+
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
+
+    for step in path:
+        v = step[3]  # velocity
+
+        if v == 0:
+            total_cost += 1  
+
+        total_cost += (v - v_optimal) ** 2 * w_velocity  
 
     for edge in edges:
 
         a = edge[0][0]  # (x, y) of the first state
         b = edge[1][0]  # (x, y) of the second
 
-        cost = heuristic(a, b)
-        if cost == 0:  
-            cost = 1  
-
-        total_cost += cost
+        dv = edge[1][3] - edge[0][3]  # velocity change
+        
+        total_cost += heuristic(a, b) * w_distance
+        total_cost += dv ** 2 * w_acceleration
 
     return round(total_cost, 2)
 
@@ -145,6 +160,9 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
             if total_path not in A and total_path not in B:
                 B.append(total_path)
 
+        if B == []:
+            break
+
         next_path = min(B, key = lambda p: path_cost(p))
 
         # print("\nNext path added to A:", next_path)   
@@ -165,8 +183,8 @@ class Pathspace(PriorityQueue):
 
 # TESTING
 testgraph = GridGraph(9, 9)
-start_state = ((0, 0), 0, 0, 2) # (x, y), t, heading, velocity
-goal_xy = (8, 8)
+start_state = ((0, 0), 0, 1, 2) # (x, y), t, heading, velocity
+goal_xy = (0, 8)
 path = spacetime_A_star_path(testgraph, start_state, goal_xy)
 print("\nA* Path")
 print("Shortest path:", path)
