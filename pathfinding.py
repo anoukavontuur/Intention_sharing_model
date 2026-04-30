@@ -4,6 +4,8 @@ from Grid import GridGraph
 import heapq
 from conflict_detection import has_conflict
 
+import parameters as p
+
 class PriorityQueue:
     def __init__(self):
         self.elements = [] # Make a queue to hold elements as (priority, item) pairs
@@ -29,10 +31,10 @@ def heuristic(a, b):
 def path_cost(path):
     total_cost = 0
 
-    v_optimal = 2          # preferred velocity
-    w_distance = 0.5       # weight for distance
-    w_velocity = 1.0      # penalty for wrong speed
-    w_acceleration = 1.0   # penalty for acceleration
+    v_optimal = p.v_optimal          
+    w_distance = p.w_distance       
+    w_velocity = p.w_velocity         
+    w_acceleration = p.w_acceleration   
 
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
 
@@ -133,8 +135,9 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
     for _ in range(1, k):
         previous_path = A[-1]
         
+        iterations = min(len(previous_path) - 1, p.detection_radius)
 
-        for i in range(len(previous_path) - 1):
+        for i in range(iterations):
             spur_node = previous_path[i]
             root_path = previous_path[:i + 1]
             blocked_next_states = []
