@@ -22,7 +22,13 @@ class VesselAgent(CellAgent):
         self.offered_tokens = 0
 
     def update_state(self):
-        self.state = ((self.cell.coordinate), self.model.time, self.heading, self.velocity)
+        heading = self.path[0][2] if self.path else self.heading
+        velocity = self.path[0][3] if self.path else self.velocity
+        self.state = ((self.cell.coordinate), self.model.time, heading, velocity)
+        
+        print (f"\nVessel {self.unique_id}")
+        print(f"Remaining path: {self.path}")
+        print(f"updated state: {self.state}")
     
     def set_pathspace(self):
         self.pathspace = Pathspace(self.model.gridgraph, self.state, self.goal.coordinate)
@@ -37,10 +43,10 @@ class VesselAgent(CellAgent):
         (x, y) = self.state[0]
         t = self.state[1]
         heading = self.state[2]
-        velocity = self.state[3]
-        wait_step = ((x, y), t + 1, heading, velocity)
+        wait_step = ((x, y), t + 1, heading, 0)
         continue_path = spacetime_A_star_path(self.model.gridgraph, wait_step, self.goal.coordinate)
-        return [wait_step] + continue_path
+        print(f"Vessel {self.unique_id} emergency breaks!")
+        return continue_path
 
         
     def move_along_path(self):

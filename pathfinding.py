@@ -181,21 +181,21 @@ class Pathspace(PriorityQueue):
             self.put(path, path_cost(path))
         self.get() # Remove the first path, which is the shortest path
 
-# TESTING
-testgraph = GridGraph(9, 9)
-start_state = ((0, 0), 0, 1, 2) # (x, y), t, heading, velocity
-goal_xy = (0, 8)
-path = spacetime_A_star_path(testgraph, start_state, goal_xy)
-print("\nA* Path")
-print("Shortest path:", path)
-print("Cost of shortest path:", path_cost(path))
+# # TESTING
+# testgraph = GridGraph(9, 9)
+# start_state = ((0, 0), 0, 1, 2) # (x, y), t, heading, velocity
+# goal_xy = (0, 8)
+# path = spacetime_A_star_path(testgraph, start_state, goal_xy)
+# print("\nA* Path")
+# print("Shortest path:", path)
+# print("Cost of shortest path:", path_cost(path))
 
-print("\nYen's K-Shortest Paths")
-pathspace = Pathspace(testgraph, start_state, goal_xy)
-while not pathspace.empty():
-    next_path = pathspace.get()
-    print("Next path:", next_path)
-    print("Cost of next path:", path_cost(next_path))
+# print("\nYen's K-Shortest Paths")
+# pathspace = Pathspace(testgraph, start_state, goal_xy)
+# while not pathspace.empty():
+#     next_path = pathspace.get()
+#     print("Next path:", next_path)
+#     print("Cost of next path:", path_cost(next_path))
 
 
 
