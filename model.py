@@ -1,5 +1,5 @@
 from agents import VesselAgent
-from pathfinding import GridGraph
+from pathfinding import GridGraph, visualization_path
 import parameters as p
 from negotiation import negotiate
 
@@ -36,7 +36,7 @@ class IntentionSharingModel(mesa.Model):
         for vessel in self.agents_by_type[VesselAgent]:
             layer_name = f"path_{vessel.unique_id}"
             self.grid.set_property(layer_name, 0.0)
-            for step in vessel.path:
+            for step in visualization_path(vessel.path):
                 cell = self.grid[step[0]]
                 setattr(cell, layer_name, getattr(cell, layer_name) + 1.0)
    
