@@ -1,7 +1,7 @@
 from mesa.discrete_space import CellAgent
 import parameters as p
 from negotiation import negotiate
-from pathfinding import Pathspace, spacetime_A_star_path, path_cost
+from pathfinding import Pathspace, spacetime_A_star_path, path_cost, visualization_path
 from conflict_detection import has_conflict
 
 class VesselAgent(CellAgent):
@@ -16,6 +16,7 @@ class VesselAgent(CellAgent):
         self.collision = False
 
         self.path = spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate)
+
         print(f"Vessel {self.unique_id} initial path: {self.path}")
 
         self.tokens = tokens
@@ -24,6 +25,9 @@ class VesselAgent(CellAgent):
     def update_state(self):
         heading = self.path[0][2] if self.path else self.heading
         velocity = self.path[0][3] if self.path else self.velocity
+        # Keep agent attributes in sync with planned state so visualization updates
+        self.heading = heading
+        self.velocity = velocity
         self.state = ((self.cell.coordinate), self.model.time, heading, velocity)
         
         print (f"\nVessel {self.unique_id}")
