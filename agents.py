@@ -61,14 +61,17 @@ class VesselAgent(CellAgent):
         
         if self.collision:
             self.path = self.wait_path()
-            
-        for i, step in enumerate(self.path):
-            if step[1] == current_time:
-                (x, y) = step[0]
-                target_cell = self.model.grid[(x, y)]
-                self.cell = target_cell
-                self.path = self.path[i:]
-                break
+
+        full_path = visualization_path(self.path)
+        steps_this_tick = [step for step in full_path if step[1] == current_time]
+
+        for step in steps_this_tick:
+            (x, y) = step[0]
+            target_cell = self.model.grid[(x, y)]
+            self.cell = target_cell
+
+        self.path = [state for state in self.path if state[1] >= current_time]
+                
 
 
     def detect_collision(self, radius):
@@ -93,6 +96,11 @@ class VesselAgent(CellAgent):
         
         self.collision = False
         return False
+    
+    def collision_avoidance(self):
+        if self.detect_collision(radius=p.detection_radius):
+            for collision_agent in self.collision_agents:
+                negotiate(self, collision_agent)
 
     def make_offer(self, opponent_offer):
         alt_path = self.generate_alternative_path(opponent_offer)
@@ -115,7 +123,4 @@ class VesselAgent(CellAgent):
             self.path = alt_path
             return "accept", self.path
     
-    def collision_avoidance(self):
-        if self.detect_collision(radius=p.detection_radius):
-            for collision_agent in self.collision_agents:
-                negotiate(self, collision_agent)
+
