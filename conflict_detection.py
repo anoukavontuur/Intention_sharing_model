@@ -1,94 +1,75 @@
 def _orientation(a, b, c):
     return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
 
-def _segments_cross(a, b, c, d):
-    if a == c or a == d or b == c or b == d:
-        return False
 
+def _on_segment(a, b, c):
+    # check of c op segment ab ligt
+    return (min(a[0], b[0]) <= c[0] <= max(a[0], b[0]) and
+            min(a[1], b[1]) <= c[1] <= max(a[1], b[1]))
+
+
+def _segments_intersect(a, b, c, d):
     o1 = _orientation(a, b, c)
     o2 = _orientation(a, b, d)
     o3 = _orientation(c, d, a)
     o4 = _orientation(c, d, b)
 
-    return (o1 > 0) != (o2 > 0) and (o3 > 0) != (o4 > 0)
+    # algemeen geval
+    if (o1 * o2 < 0) and (o3 * o4 < 0):
+        return True
 
-def time_space_path(path):
-    return [(step[0], step[1]) for step in path]
-
-def has_conflict(path1, path2):
-    path1 = time_space_path(path1)
-    path2 = time_space_path(path2)
-
-    edges1 = [(path1[i-1], path1[i]) for i in range(1, len(path1))]
-    edges2 = [(path2[i-1], path2[i]) for i in range(1, len(path2))]
-
-    #Vertex conflict
-    for step in path1:
-        if step in path2:
-            return True
-
-    #Edge conflict
-    for edge1 in edges1:
-        for edge2 in edges2:
-            if _segments_cross(edge1[0][0], edge1[1][0], edge2[0][0], edge2[1][0]) and edge1[0][1] == edge2[0][1]: 
-                return True
-
-    #Following conflict
-    for edge1 in edges1:
-        for edge2 in edges2:
-            if (edge1[0][0] == edge2[1][0] or edge1[1][0] == edge2[0][0]) and edge1[0][1] == edge2[0][1]:
-                return True
+    # collineair gevallen
+    if o1 == 0 and _on_segment(a, b, c): return True
+    if o2 == 0 and _on_segment(a, b, d): return True
+    if o3 == 0 and _on_segment(c, d, a): return True
+    if o4 == 0 and _on_segment(c, d, b): return True
 
     return False
 
+
+def _time_overlap(t1a, t1b, t2a, t2b):
+    return t1a == t2a and t1b == t2b
+
+
 def has_conflict(path1, path2):
-    # edges: ((pos1, t1, h1), (pos2, t2, h2))
+    # edges: ((pos, t, h), (pos, t, h))
     edges1 = [(path1[i-1], path1[i]) for i in range(1, len(path1))]
     edges2 = [(path2[i-1], path2[i]) for i in range(1, len(path2))]
 
     # -----------------
-    # Vertex conflict
-    # zelfde positie op zelfde tijd (heading negeren)
+    # Vertex conflict (exact zelfde tijd)
     # -----------------
-    positions_times_2 = {(s[0], s[1]) for s in path2}
-
+    states2 = {(s[0], s[1]) for s in path2}
     for s1 in path1:
-        if (s1[0], s1[1]) in positions_times_2:
+        if (s1[0], s1[1]) in states2:
             return True
 
     # -----------------
-    # Edge conflict (kruisen)
+    # Continue edge conflicts
     # -----------------
     for e1 in edges1:
         for e2 in edges2:
-            pos1_a, t1_a = e1[0][0], e1[0][1]
-            pos1_b, t1_b = e1[1][0], e1[1][1]
+            p1a, t1a = e1[0][0], e1[0][1]
+            p1b, t1b = e1[1][0], e1[1][1]
 
-            pos2_a, t2_a = e2[0][0], e2[0][1]
-            pos2_b, t2_b = e2[1][0], e2[1][1]
+            p2a, t2a = e2[0][0], e2[0][1]
+            p2b, t2b = e2[1][0], e2[1][1]
 
-            if t1_a == t2_a:  # zelfde tijdstap
-                if _segments_cross(pos1_a, pos1_b, pos2_a, pos2_b):
-                    return True
+            # alleen relevant als tijd overlapt
+            if not _time_overlap(t1a, t1b, t2a, t2b):
+                continue
 
-    # -----------------
-    # Swap / following conflict
-    # -----------------
-    for e1 in edges1:
-        for e2 in edges2:
-            pos1_a, t1_a = e1[0][0], e1[0][1]
-            pos1_b = e1[1][0]
+            # 1. geometrisch kruisen / raken
+            if _segments_intersect(p1a, p1b, p2a, p2b):
+                return True
 
-            pos2_a, t2_a = e2[0][0], e2[0][1]
-            pos2_b = e2[1][0]
+            # 2. swap (tegengestelde richting op zelfde lijn)
+            if p1a == p2b and p1b == p2a:
+                return True
 
-            if t1_a == t2_a:
-                # swap: A→B en B→A
-                if pos1_a == pos2_b and pos1_b == pos2_a:
-                    return True
-
-                # following (optioneel, afhankelijk van je definitie)
-                if pos1_b == pos2_a:
-                    return True
+            # 3. following / inhalen (zelfde lijn, zelfde richting)
+            if p1b == p2a or p1a == p2b:
+                return True
 
     return False
+

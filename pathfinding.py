@@ -30,8 +30,8 @@ def path_cost(path):
     total_cost = 0
 
     v_optimal = 2          # preferred velocity
-    w_distance = 1.0       # weight for distance
-    w_velocity = 0.5       # penalty for wrong speed
+    w_distance = 0.5       # weight for distance
+    w_velocity = 1.0      # penalty for wrong speed
     w_acceleration = 1.0   # penalty for acceleration
 
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
