@@ -34,6 +34,8 @@ def path_cost(path):
     velocity_cost = 0
     distance_cost = 0
     acceleration_cost = 0
+
+    v_optimal = p.v_optimal
                       
     w_distance = p.w_distance       
     w_velocity = p.w_velocity         
@@ -43,7 +45,7 @@ def path_cost(path):
 
     for step in path:
         v = step[3]  # velocity
-        velocity_cost += (v + 1) * w_velocity
+        velocity_cost += abs(v - v_optimal) * w_velocity
 
     for edge in edges:
 
@@ -53,7 +55,7 @@ def path_cost(path):
         dv = edge[1][3] - edge[0][3]  # velocity change
         
         distance_cost += heuristic(a, b) * w_distance
-        acceleration_cost += dv ** 2 * w_acceleration
+        acceleration_cost += abs(dv) * w_acceleration
 
     total_cost = velocity_cost + distance_cost + acceleration_cost
 
@@ -217,21 +219,21 @@ def visualization_path(path):
 
 
 
-# TESTING
-testgraph = GridGraph(9, 9)
-start_state = ((0, 0), 0, 1, 2) # (x, y), t, heading, velocity
-goal_xy = (0, 8)
-path = spacetime_A_star_path(testgraph, start_state, goal_xy)
-print("\nA* Path")
-print("Shortest path:", path)
-print("Cost of shortest path:", path_cost(path))
+# # TESTING
+# testgraph = GridGraph(9, 9)
+# start_state = ((0, 0), 0, 1, 2) # (x, y), t, heading, velocity
+# goal_xy = (0, 8)
+# path = spacetime_A_star_path(testgraph, start_state, goal_xy)
+# print("\nA* Path")
+# print("Shortest path:", path)
+# print("Cost of shortest path:", path_cost(path))
 
-print("\nYen's K-Shortest Paths")
-pathspace = Pathspace(testgraph, start_state, goal_xy)
-while not pathspace.empty():
-    next_path = pathspace.get()
-    print("Next path:", next_path)
-    print("Cost of next path:", path_cost(next_path))
+# print("\nYen's K-Shortest Paths")
+# pathspace = Pathspace(testgraph, start_state, goal_xy)
+# while not pathspace.empty():
+#     next_path = pathspace.get()
+#     print("Next path:", next_path)
+#     print("Cost of next path:", path_cost(next_path))
 
 
 
