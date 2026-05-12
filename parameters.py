@@ -1,14 +1,20 @@
-# 3 vessels
-number_of_vessels = 3
-start_positions = [(0, 0), (8, 0), (6, 0)]
-goal_positions = [(8, 8), (0, 8), (6, 8)]
-start_headings = [1, 1, 1]
-start_velocities = [1, 1, 1]
-tokens = [1, 0, 0]
+#Vessel parameters
+number_of_vessels = 4
+start_positions = [(0, 0), (19, 0), (6, 0), (0, 15)]
+goal_positions = [(19, 19), (0, 19), (6, 19), (19, 15)]
+start_headings = [2, 0, 1, 3]
+start_velocities = [1, 1, 1, 1]
+tokens = [1, 1, 1, 1]
 
-detection_radius = 6
+#Detection radius
+detection_radius = 15
 
 # Grid dimensions
-width = 9 
-height = 9
+width = 20
+height = 20
 
+# A* parameters
+    
+w_distance = 0.5       
+w_velocity = 1      
+w_acceleration = 1.0   
