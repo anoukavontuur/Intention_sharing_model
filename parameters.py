@@ -10,8 +10,14 @@ tokens = [1, 1, 1, 1]
 detection_radius = 15
 
 # Grid dimensions
-width = 20
-height = 20
+width = 30 
+height = 30
+
+# Pathfinding parameters
+v_optimal = 2        # preferred velocity
+w_distance = 1.0       # weight for distance
+w_velocity = 0.5         # penalty for wrong speed
+w_acceleration = 1.0  # penalty for acceleration
 
 # A* parameters
     

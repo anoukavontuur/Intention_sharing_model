@@ -5,6 +5,8 @@ import heapq
 from conflict_detection import has_conflict
 import parameters as p
 
+import parameters as p
+
 class PriorityQueue:
     def __init__(self):
         self.elements = [] # Make a queue to hold elements as (priority, item) pairs
@@ -32,9 +34,9 @@ def path_cost(path):
     velocity_cost = 0
     distance_cost = 0
     acceleration_cost = 0
-        
+                      
     w_distance = p.w_distance       
-    w_velocity = p.w_velocity      
+    w_velocity = p.w_velocity         
     w_acceleration = p.w_acceleration   
 
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
@@ -134,8 +136,9 @@ def Yens_algorithm(graph, start_state, goal_xy, reservation_table=None):
     for _ in range(1, k):
         previous_path = A[-1]
         
+        iterations = min(len(previous_path) - 1, p.detection_radius)
 
-        for i in range(len(previous_path) - 1):
+        for i in range(iterations):
             spur_node = previous_path[i]
             root_path = previous_path[:i + 1]
             blocked_next_states = []
