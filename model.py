@@ -7,25 +7,36 @@ import mesa
 from mesa.discrete_space import OrthogonalMooreGrid
 
 class IntentionSharingModel(mesa.Model):
-    def __init__(self, number_of_vessels, width, height):
+    def __init__(self, width, height):
         super().__init__()
 
-        self.number_of_vessels = number_of_vessels
+        self.number_of_vessels = len(p.agents)
         self.grid = OrthogonalMooreGrid((width, height), torus=False, random=self.random)
         self.gridgraph = GridGraph(width, height)
 
         print(f"\nInitializing model with {self.number_of_vessels} vessels.")
 
-        # Create agents
-        VesselAgent.create_agents(
-            self,
-            self.number_of_vessels,
-            start_cell=[self.grid[pos] for pos in p.start_positions],
-            goal_cell=[self.grid[pos] for pos in p.goal_positions],
-            start_heading=[h for h in p.start_headings],
-            start_velocity=[v for v in p.start_velocities],
-            tokens=[t for t in p.tokens]
-        )
+        # # Create agents
+        # VesselAgent.create_agents(
+        #     self,
+        #     self.number_of_vessels,
+        #     start_cell=[self.grid[pos] for pos in p.start_positions],
+        #     goal_cell=[self.grid[pos] for pos in p.goal_positions],
+        #     start_heading=[h for h in p.start_headings],
+        #     start_velocity=[v for v in p.start_velocities],
+        #     tokens=[t for t in p.tokens]
+        # )
+
+        for agent in p.agents:
+            VesselAgent.create_agents(
+                self,
+                1,
+                start_cell = self.grid[agent[0]],
+                goal_cell = self.grid[agent[1]],
+                start_heading = agent[2],
+                start_velocity = agent[3],
+                tokens = agent[4]
+            )
 
         # Visualize each planned path on its own property layer
         for vessel in self.agents_by_type[VesselAgent]:

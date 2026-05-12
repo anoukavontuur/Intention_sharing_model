@@ -1,10 +1,10 @@
-#Vessel parameters
-number_of_vessels = 4
-start_positions = [(0, 0), (29, 0), (6, 0), (0, 25)]
-goal_positions = [(29, 29), (0, 29), (6, 29), (29, 25)]
-start_headings = [2, 0, 1, 3]
-start_velocities = [1, 1, 1, 1]
-tokens = [1, 1, 1, 1]
+#Agent parameters [start_cell, goal_cell, start_heading, start_velocity, tokens]
+agents = [
+    [(0, 0),    (29, 29),   2,  1,  1], 
+    [(29, 0),   (0, 29),    0,  1,  1],
+    [(6, 0),    (6, 29),    1,  1,  1],
+    [(0, 25),   (29, 25),   3,  1,  1],
+]
 
 #Detection radius
 detection_radius = 5

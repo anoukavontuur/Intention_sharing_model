@@ -13,7 +13,6 @@ AGENT_COLORS = [
     "#1f77b4",
     "#ff7f0e",
     "#2ca02c",
-    "#d62728",
     "#9467bd",
     "#8c564b",
     "#e377c2",
@@ -32,7 +31,6 @@ def _agent_color_by_id(unique_id):
 
 # Create the model instance
 model_instance = IntentionSharingModel(
-    number_of_vessels=p.number_of_vessels,
     width=p.width,
     height=p.height,
 )
@@ -82,7 +80,6 @@ def property_layer_portrayal(layer):
     return None
 
 model_params = {
-    "number_of_vessels": p.number_of_vessels,
     "width": p.width,
     "height": p.height,
 }
