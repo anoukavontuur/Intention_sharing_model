@@ -13,6 +13,15 @@ class IntentionSharingModel(mesa.Model):
         self.grid = OrthogonalMooreGrid((width, height), torus=False, random=self.random)
         self.gridgraph = GridGraph(width, height)
 
+        # Initiating data collector
+        self.datacollector = mesa.DataCollector(
+            agent_reporters={"State": "state",
+                             "Goal": "goal_coordinate",
+                             "Path": "path", 
+                             "Tokens": "tokens"
+                             }
+        )
+
         print(f"\nInitializing model with {self.number_of_vessels} vessels.")
 
         for agent in p.agents:
@@ -41,6 +50,7 @@ class IntentionSharingModel(mesa.Model):
    
     def step(self):
         print(f"\n--- Time step {self.time} ---")
+
         # 1. Detect conflicts and negotiate if necessary
         self.agents_by_type[VesselAgent].shuffle_do("collision_avoidance")
         self.agents_by_type[VesselAgent].shuffle_do("detect_collision", radius=p.detection_radius)
@@ -49,5 +59,10 @@ class IntentionSharingModel(mesa.Model):
         # 2. Update paths and states
         self.refresh_paths_layer()
         self.agents_by_type[VesselAgent].shuffle_do("update_state")
-        
+        self.datacollector.collect(self)
 
+        # 3. Check if all vessels have reached their goals
+        if all(vessel.cell.coordinate == vessel.goal.coordinate for vessel in self.agents_by_type[VesselAgent]):
+            print("All vessels have reached their goals. Stopping the model.")
+            self.running = False
+        

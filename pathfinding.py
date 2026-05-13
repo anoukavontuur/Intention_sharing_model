@@ -76,10 +76,6 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None,
         current_heading = current_state[2]  # heading
         current_velocity = current_state[3]  # velocity
 
-        if current_t > horizon:
-            print("Horizon exceeded, no path found within the horizon.")
-            break
-        
         # Check if goal is reached (any time is acceptable)
         if current_xy == goal_xy:
             goal_state = current_state
@@ -89,6 +85,9 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None,
         for next_state in graph.neighbors(current_xy, current_t, goal_xy, current_heading, current_velocity):
            
             if has_conflict([current_state, next_state], reservation_table):
+                continue
+
+            if next_state[1] > horizon:
                 continue
 
             new_cost = cost_so_far[current_state] + path_cost([current_state, next_state])

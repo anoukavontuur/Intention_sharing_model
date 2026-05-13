@@ -19,4 +19,7 @@ v_optimal = 2
 w_distance = 0.2     
 w_velocity = 0     
 w_acceleration = 0.2
+
+# maximum horizon
+horizon = 30
  

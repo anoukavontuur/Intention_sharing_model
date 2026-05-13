@@ -9,6 +9,8 @@ class VesselAgent(CellAgent):
         super().__init__(model)
         self.cell = start_cell
         self.goal = goal_cell
+        self.goal_coordinate = self.goal.coordinate
+
         self.heading = start_heading
         self.velocity = start_velocity
         self.state = ((self.cell.coordinate), self.model.time, self.heading, self.velocity)  # (x, y), t, heading
@@ -16,6 +18,7 @@ class VesselAgent(CellAgent):
         self.collision = False
 
         self.path = spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate)
+        self.taken_path = [self.state]
 
         print(f"Vessel {self.unique_id} initial path: {self.path}")
 
@@ -29,6 +32,7 @@ class VesselAgent(CellAgent):
         self.heading = heading
         self.velocity = velocity
         self.state = ((self.cell.coordinate), self.model.time, heading, velocity)
+        self.taken_path.append(self.state)
         
         print (f"\nVessel {self.unique_id}")
         print(f"Remaining path: {self.path}")
@@ -51,7 +55,6 @@ class VesselAgent(CellAgent):
         continue_path = spacetime_A_star_path(self.model.gridgraph, wait_step, self.goal.coordinate)
         print(f"Vessel {self.unique_id} emergency breaks!")
         return continue_path
-
         
     def move_along_path(self):
         current_time = self.model.time
@@ -71,9 +74,7 @@ class VesselAgent(CellAgent):
             self.cell = target_cell
 
         self.path = [state for state in self.path if state[1] >= current_time]
-                
-
-
+               
     def detect_collision(self, radius):
         """Detect nearby vessels and check for planned conflicts using space-time paths."""
         self.collision_agents = []
