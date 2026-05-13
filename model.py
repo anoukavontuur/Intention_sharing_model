@@ -1,7 +1,6 @@
 from agents import VesselAgent
 from pathfinding import GridGraph, visualization_path
 import parameters as p
-from negotiation import negotiate
 
 import mesa
 from mesa.discrete_space import OrthogonalMooreGrid
@@ -15,17 +14,6 @@ class IntentionSharingModel(mesa.Model):
         self.gridgraph = GridGraph(width, height)
 
         print(f"\nInitializing model with {self.number_of_vessels} vessels.")
-
-        # # Create agents
-        # VesselAgent.create_agents(
-        #     self,
-        #     self.number_of_vessels,
-        #     start_cell=[self.grid[pos] for pos in p.start_positions],
-        #     goal_cell=[self.grid[pos] for pos in p.goal_positions],
-        #     start_heading=[h for h in p.start_headings],
-        #     start_velocity=[v for v in p.start_velocities],
-        #     tokens=[t for t in p.tokens]
-        # )
 
         for agent in p.agents:
             VesselAgent.create_agents(

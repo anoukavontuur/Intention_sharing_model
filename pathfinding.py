@@ -1,11 +1,8 @@
-from os import path
+import heapq
+import parameters as p
 
 from Grid import GridGraph
-import heapq
 from conflict_detection import has_conflict
-import parameters as p
-
-import parameters as p
 
 class PriorityQueue:
     def __init__(self):
@@ -43,21 +40,19 @@ def path_cost(path):
 
     edges = [(path[i-1], path[i]) for i in range(1, len(path))]
 
-    for step in path:
-        v = step[3]  # velocity
-        velocity_cost += abs(v - v_optimal) * w_velocity
-
     for edge in edges:
 
         a = edge[0][0]  # (x, y) of the first state
         b = edge[1][0]  # (x, y) of the second
 
+        v = edge[1][3]  
         dv = edge[1][3] - edge[0][3]  # velocity change
         
-        distance_cost += heuristic(a, b) * w_distance
-        acceleration_cost += abs(dv) * w_acceleration
-
-    total_cost = velocity_cost + distance_cost + acceleration_cost
+        velocity_cost += abs(v - v_optimal) 
+        acceleration_cost += abs(dv) 
+        distance_cost += heuristic(a, b) 
+        
+    total_cost = velocity_cost * w_velocity + distance_cost * w_distance + acceleration_cost * w_acceleration
 
     return round(total_cost, 2)
 
@@ -82,6 +77,7 @@ def spacetime_A_star_search(graph, start_state, goal_xy, reservation_table=None,
         current_velocity = current_state[3]  # velocity
 
         if current_t > horizon:
+            print("Horizon exceeded, no path found within the horizon.")
             break
         
         # Check if goal is reached (any time is acceptable)
@@ -216,8 +212,6 @@ def visualization_path(path):
     
     full_path.append(last_edge)
     return full_path
-
-
 
 # # TESTING
 # testgraph = GridGraph(9, 9)

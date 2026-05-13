@@ -10,15 +10,11 @@ from model import IntentionSharingModel
 import parameters as p
 
 AGENT_COLORS = [
-    "#1f77b4",
-    "#ff7f0e",
-    "#2ca02c",
+    "#E97132",
+    "#4EA72E",
+    "#0F9ED5",
     "#9467bd",
-    "#8c564b",
-    "#e377c2",
-    "#7f7f7f",
-    "#bcbd22",
-    "#17becf",
+    "#FFCE1B",
 ]
 
 
