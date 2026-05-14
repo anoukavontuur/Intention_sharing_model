@@ -1,8 +1,11 @@
 from mesa.discrete_space import CellAgent
-import parameters as p
+
+
 from negotiation import negotiate
 from pathfinding import Pathspace, spacetime_A_star_path, path_cost, visualization_path
 from conflict_detection import has_conflict
+
+import parameters as p
 
 class VesselAgent(CellAgent):
     def __init__(self, model, start_cell, goal_cell, start_heading, start_velocity, tokens):
@@ -18,12 +21,15 @@ class VesselAgent(CellAgent):
         self.collision = False
 
         self.path = spacetime_A_star_path(self.model.gridgraph, self.state, self.goal.coordinate)
-        self.taken_path = [self.state]
+        self.travelled_path = [self.state]
 
         print(f"Vessel {self.unique_id} initial path: {self.path}")
 
         self.tokens = tokens
         self.offered_tokens = 0
+
+        self.collisions_detected = 0
+        self.emergency_breaks = 0
 
     def update_state(self):
         heading = self.path[0][2] if self.path else self.heading
@@ -32,11 +38,11 @@ class VesselAgent(CellAgent):
         self.heading = heading
         self.velocity = velocity
         self.state = ((self.cell.coordinate), self.model.time, heading, velocity)
-        self.taken_path.append(self.state)
+        self.travelled_path.append(self.state)
         
-        print (f"\nVessel {self.unique_id}")
-        print(f"Remaining path: {self.path}")
-        print(f"updated state: {self.state}")
+        # print (f"\nVessel {self.unique_id}")
+        # print(f"Remaining path: {self.path}")
+        # print(f"updated state: {self.state}")
     
     def set_pathspace(self):
         self.pathspace = Pathspace(self.model.gridgraph, self.state, self.goal.coordinate)
@@ -53,16 +59,19 @@ class VesselAgent(CellAgent):
         heading = self.state[2]
         wait_step = ((x, y), t + 1, heading, 0)
         continue_path = spacetime_A_star_path(self.model.gridgraph, wait_step, self.goal.coordinate)
-        print(f"Vessel {self.unique_id} emergency breaks!")
         return continue_path
         
     def move_along_path(self):
         current_time = self.model.time
+        self.detect_collision(radius=p.detection_radius)
 
         if not self.path:
             return  # No path to follow
         
         if self.collision:
+            print(f"Vessel {self.unique_id} emergency breaks!")
+            self.emergency_breaks += 1
+
             self.path = self.wait_path()
 
         full_path = visualization_path(self.path)
@@ -91,8 +100,13 @@ class VesselAgent(CellAgent):
         for nearby_agent in self.nearby_agents:
             if has_conflict(self.path, nearby_agent.path):
                 print(f"\nCollision detected between Vessel {self.unique_id} and Vessel {nearby_agent.unique_id}")
+                
                 self.collision_agents.append(nearby_agent)
                 self.collision = True
+
+                self.collisions_detected += 1
+                nearby_agent.collisions_detected += 1
+
                 return True
         
         self.collision = False
@@ -110,7 +124,8 @@ class VesselAgent(CellAgent):
             self.path = self.wait_path()
             return "wait", self.path
         
-        print(f"Vessel {self.unique_id} evaluating offer: \ncurrent path cost = {self.cost(self.path)} \nalternative path cost = {self.cost(alt_path)}, \ntokens = {self.tokens}, \noffered tokens = {self.offered_tokens}")
+        # print(f"Vessel {self.unique_id} evaluating offer: \ncurrent path cost = {self.cost(self.path)} \nalternative path cost = {self.cost(alt_path)}, \ntokens = {self.tokens}, \noffered tokens = {self.offered_tokens}")
+        
         if self.cost(self.path) < self.cost(alt_path):
             if self.tokens - self.offered_tokens > 0:
                 self.offered_tokens += 1

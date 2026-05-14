@@ -1,5 +1,5 @@
 from agents import VesselAgent
-from pathfinding import GridGraph, visualization_path
+from pathfinding import GridGraph, path_cost, visualization_path
 import parameters as p
 
 import mesa
@@ -16,9 +16,9 @@ class IntentionSharingModel(mesa.Model):
         # Initiating data collector
         self.datacollector = mesa.DataCollector(
             agent_reporters={"State": "state",
-                             "Goal": "goal_coordinate",
-                             "Path": "path", 
-                             "Tokens": "tokens"
+                             "Cost so far": lambda a: path_cost(a.travelled_path),
+                             "Collisions detected": "collisions_detected",
+                             "Emergency breaks": "emergency_breaks"
                              }
         )
 
@@ -40,6 +40,8 @@ class IntentionSharingModel(mesa.Model):
             self.grid.create_property_layer(f"path_{vessel.unique_id}", default_value=0.0, dtype=float)
         self.refresh_paths_layer()
 
+        self.datacollector.collect(self)
+
     def refresh_paths_layer(self):
         for vessel in self.agents_by_type[VesselAgent]:
             layer_name = f"path_{vessel.unique_id}"
@@ -52,8 +54,10 @@ class IntentionSharingModel(mesa.Model):
         print(f"\n--- Time step {self.time} ---")
 
         # 1. Detect conflicts and negotiate if necessary
+        print("\nCollision avoidance phase:")
         self.agents_by_type[VesselAgent].shuffle_do("collision_avoidance")
-        self.agents_by_type[VesselAgent].shuffle_do("detect_collision", radius=p.detection_radius)
+
+        print("\nMovement phase:")
         self.agents_by_type[VesselAgent].shuffle_do("move_along_path")
         
         # 2. Update paths and states
@@ -63,6 +67,6 @@ class IntentionSharingModel(mesa.Model):
 
         # 3. Check if all vessels have reached their goals
         if all(vessel.cell.coordinate == vessel.goal.coordinate for vessel in self.agents_by_type[VesselAgent]):
-            print("All vessels have reached their goals. Stopping the model.")
+            print("\nAll vessels have reached their goals. Stopping the model.")
             self.running = False
         
