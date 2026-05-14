@@ -1,6 +1,5 @@
 from mesa.discrete_space import CellAgent
 
-
 from negotiation import negotiate
 from pathfinding import Pathspace, spacetime_A_star_path, path_cost, visualization_path
 from conflict_detection import has_conflict

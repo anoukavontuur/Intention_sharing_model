@@ -46,8 +46,6 @@ def negotiate(agenta, agentb):
             return
         
     print("\nNegotiation failed, both agents keep their paths")
-    agenta.negotiations_failed += 1
-    agentb.negotiations_failed += 1
 
 def resolve(winner, offer, loser):
     #Payement

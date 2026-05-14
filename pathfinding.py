@@ -1,7 +1,7 @@
 import heapq
 import parameters as p
 
-from Grid import GridGraph
+from grid import GridGraph
 from conflict_detection import has_conflict
 
 class PriorityQueue:

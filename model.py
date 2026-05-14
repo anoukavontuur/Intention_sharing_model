@@ -15,7 +15,7 @@ class IntentionSharingModel(mesa.Model):
 
         # Initiating data collector
         self.datacollector = mesa.DataCollector(
-            agent_reporters={"State": "state",
+            agent_reporters={"Path cost": lambda a: path_cost(a.path),
                              "Cost so far": lambda a: path_cost(a.travelled_path),
                              "Collisions detected": "collisions_detected",
                              "Emergency breaks": "emergency_breaks"

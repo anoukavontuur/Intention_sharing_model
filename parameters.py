@@ -1,9 +1,12 @@
-#Agent parameters [start_cell, goal_cell, start_heading, start_velocity, tokens]
-agents = [
-    [(10, 1),  (10, 18),   1,  2,  1],
-    [(1, 10),  (18, 10),   3,  2,  1],
-    [(1, 1),   (18, 18),   2,  2,  1]
-]
+from scenarios import set_scenario
+
+#Number of runs
+n_runs = 10
+
+#Agent scenarios
+scenario = 1
+agents = set_scenario(scenario)
+number_of_vessels = len(agents)
 
 #Detection radius
 detection_radius = 8
